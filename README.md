@@ -9,8 +9,8 @@ Dashboard interactivo y autónomo para visualizar la evolución del Índice de P
 - 📈 **IPC general** – evolución y nivel del índice base 2016.
 - 📊 **Por división** – inflación de cada una de las 12 divisiones, comparada con el IPC general.
 - 🌡️ **Heatmap** – inflación por división y mes (rojo = inflación, verde = deflación).
-- 🧾 **Contribuciones al IPC general** – qué productos explican la inflación (top 50 por período).
-- 🧩 **Contribuciones por división** – desglose dentro de cada división
+- 🧾 **Contribuciones a la inflación general** – qué productos explican la inflación (top 50 por período).
+- 🧩 **Contribuciones a la inflación por división** – desglose dentro de cada división
 
 ---
 
