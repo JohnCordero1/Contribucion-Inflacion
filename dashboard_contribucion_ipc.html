@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard IPC Bolivia</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
+  --text:#e6edf3;--text2:#8b949e;
+  --accent:#0054a6;--accent2:#3fb950;--warn:#f85149;--gold:#d29922;
+  --font:"IBM Plex Sans",sans-serif;--mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px;white-space:nowrap}
+header h1{font-size:15px;font-weight:500}
+.subtitle{font-size:12px;color:var(--text2);margin-left:auto;white-space:nowrap}
+.container{max-width:1400px;margin:0 auto;padding:24px}
+.tabs{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:24px;overflow-x:auto}
+.tab{padding:7px 14px;border-radius:5px;cursor:pointer;font-size:13px;color:var(--text2);white-space:nowrap;transition:all .15s;border:none;background:none}
+.tab:hover{color:var(--text);background:var(--bg3)}.tab.active{background:var(--accent);color:#fff;font-weight:500}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
+.controls label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:5px;font-size:13px;font-family:var(--font);cursor:pointer;outline:none}
+select:focus{border-color:var(--accent)}
+.measure-btns{display:flex;gap:4px}
+.mbtn{padding:5px 12px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s;font-family:var(--font)}
+.mbtn:hover{border-color:var(--accent);color:var(--accent)}.mbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.blue::before{background:var(--accent)}.kpi.green::before{background:var(--accent2)}.kpi.red::before{background:var(--warn)}
+.kpi-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.kpi-val{font-family:var(--mono);font-size:24px;font-weight:500;line-height:1}
+.kpi-val.pos{color:var(--warn)}.kpi-val.neg{color:var(--accent2)}.kpi-val.neu{color:var(--text)}
+.kpi-sub{font-size:11px;color:var(--text2);margin-top:4px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px}
+.card-title{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title .bar{display:inline-block;width:3px;height:14px;border-radius:2px;background:var(--accent)}
+canvas{max-height:320px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.contrib-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--bg3);padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid #1c2028;transition:background .1s}tbody tr:hover{background:var(--bg3)}
+tbody td{padding:7px 12px;color:var(--text)}tbody td.num{font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
+.contrib-bar{display:inline-block;height:8px;border-radius:2px;vertical-align:middle;margin-right:6px;min-width:2px}
+.heatmap-wrap{overflow-x:auto}
+.hm-table{border-collapse:collapse;font-size:11px;white-space:nowrap}
+.hm-table th{padding:5px 8px;background:var(--bg3);color:var(--text2);font-weight:500;border:1px solid var(--border);text-align:center}
+.hm-table td{padding:5px 8px;border:1px solid var(--border);text-align:center;font-family:var(--mono);font-size:11px;cursor:default}
+.hm-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin-bottom:12px}
+.hm-legend span{display:inline-flex;align-items:center;gap:5px}
+.hm-swatch{display:inline-block;width:12px;height:12px;border-radius:2px}
+input[type=text]{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:5px;font-size:13px;font-family:var(--font);outline:none;width:220px}
+input[type=text]:focus{border-color:var(--accent)}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-family:var(--mono);font-weight:500}
+.badge.pos{background:rgba(248,81,73,.15);color:var(--warn)}.badge.neg{background:rgba(63,185,80,.15);color:var(--accent2)}.badge.neu{background:var(--bg3);color:var(--text2)}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:999}
+.spinner{width:36px;height:36px;border:3px solid var(--bg3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:var(--text2);font-size:13px}
+#error-msg{display:none;background:rgba(248,81,73,.1);border:1px solid var(--warn);border-radius:8px;padding:16px 20px;color:var(--warn);font-size:13px;margin-bottom:20px}
+</style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><p>Cargando datos IPC...</p></div>
+<header>
+  <div class="logo">Fuente &middot; INE Bolivia</div>
+  <h1>Dashboard de la Inflaci&oacute;n para Bolivia</h1>
+  <div class="subtitle" id="hdr-range"></div>
+</header>
+<div class="container">
+  <div id="error-msg"></div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('general')">IPC General</button>
+    <button class="tab" onclick="switchTab('divisiones')">Por Divisi&oacute;n</button>
+    <button class="tab" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
+    <button class="tab" onclick="switchTab('contrib_gen')">Contribuciones al IPC</button>
+    <button class="tab" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
+  </div>
+
+  <!-- TAB GENERAL -->
+  <div class="tab-panel active" id="tab-general">
+    <div class="controls">
+      <label>Periodo</label>
+      <select id="gen-from" onchange="updateGeneral()"></select>
+      <span style="color:var(--text2)">&#8594;</span>
+      <select id="gen-to" onchange="updateGeneral()"></select>
+      <div class="measure-btns">
+        <button class="mbtn active" id="mbtn-mensual" onclick="setMeasure('mensual')">Mensual</button>
+        <button class="mbtn" id="mbtn-acumulada" onclick="setMeasure('acumulada')">Acumulada</button>
+        <button class="mbtn" id="mbtn-a12m" onclick="setMeasure('a12m')">12 meses</button>
+      </div>
+    </div>
+    <div class="kpi-row" id="gen-kpis"></div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n General &mdash; <em id="gen-chart-title" style="color:var(--accent);font-style:normal"></em></div>
+      <canvas id="chart-gen-line"></canvas>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="card-title"><span class="bar"></span>Nivel del &Iacute;ndice de Precios al Consumidor</div>
+        <canvas id="chart-gen-level"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="bar"></span>Comparativa por Divisi&oacute;n (&uacute;ltimo periodo)</div>
+        <canvas id="chart-div-bar"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB DIVISIONES -->
+  <div class="tab-panel" id="tab-divisiones">
+    <div class="controls">
+      <label>Divisi&oacute;n</label>
+      <select id="sel-div" onchange="updateDivision()"></select>
+      <label>Periodo</label>
+      <select id="div-from" onchange="updateDivision()"></select>
+      <span style="color:var(--text2)">&#8594;</span>
+      <select id="div-to" onchange="updateDivision()"></select>
+      <div class="measure-btns">
+        <button class="mbtn active" id="dmbtn-mensual" onclick="setDivMeasure('mensual')">Mensual</button>
+        <button class="mbtn" id="dmbtn-acumulada" onclick="setDivMeasure('acumulada')">Acumulada</button>
+        <button class="mbtn" id="dmbtn-a12m" onclick="setDivMeasure('a12m')">12 meses</button>
+      </div>
+    </div>
+    <div class="kpi-row" id="div-kpis"></div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n Divisi&oacute;n vs General</div>
+      <canvas id="chart-div-line"></canvas>
+    </div>
+  </div>
+
+  <!-- TAB HEATMAP -->
+  <div class="tab-panel" id="tab-heatmap">
+    <div class="controls">
+      <label>Medida</label>
+      <div class="measure-btns">
+        <button class="mbtn active" id="hmbtn-mensual" onclick="setHmMeasure('mensual')">Mensual</button>
+        <button class="mbtn" id="hmbtn-acumulada" onclick="setHmMeasure('acumulada')">Acumulada</button>
+        <button class="mbtn" id="hmbtn-a12m" onclick="setHmMeasure('a12m')">12 meses</button>
+      </div>
+      <label>A&ntilde;o</label>
+      <select id="hm-year" onchange="renderHeatmap()"></select>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n por Divisi&oacute;n y Mes</div>
+      <div class="hm-legend">
+        <span><span class="hm-swatch" style="background:#f85149"></span> Inflaci&oacute;n (rojo)</span>
+        <span><span class="hm-swatch" style="background:#3fb950"></span> Deflaci&oacute;n (verde)</span>
+        <span><span class="hm-swatch" style="background:#21262d;border:1px solid #30363d"></span> Sin dato</span>
+        <span>Intensidad: 0% = gris, &gt;=8 pp = color pleno</span>
+      </div>
+      <div class="heatmap-wrap" id="hm-container"></div>
+    </div>
+  </div>
+
+  <!-- TAB CONTRIB GENERAL -->
+  <div class="tab-panel" id="tab-contrib_gen">
+    <div class="controls">
+      <label>Periodo</label>
+      <select id="cg-period" onchange="renderContribGeneral()"></select>
+      <div class="measure-btns">
+        <button class="mbtn active" id="cgmbtn-mensual" onclick="setCgMeasure('mensual')">Mensual</button>
+        <button class="mbtn" id="cgmbtn-acumulada" onclick="setCgMeasure('acumulada')">Acumulada</button>
+        <button class="mbtn" id="cgmbtn-a12m" onclick="setCgMeasure('a12m')">12 meses</button>
+      </div>
+      <input type="text" id="cg-search" placeholder="Buscar producto..." oninput="renderContribGeneral()">
+    </div>
+    <div class="kpi-row" id="cg-kpis"></div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Top 50 contribuyentes a la inflaci&oacute;n general</div>
+      <div class="contrib-wrap" id="cg-table"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Descomposici&oacute;n de la inflaci&oacute;n general por divisi&oacute;n</div>
+      <canvas id="chart-cg-stacked"></canvas>
+    </div>
+  </div>
+
+  <!-- TAB CONTRIB DIV -->
+  <div class="tab-panel" id="tab-contrib_div">
+    <div class="controls">
+      <label>Divisi&oacute;n</label>
+      <select id="cd-div" onchange="renderContribDiv()"></select>
+      <label>Periodo</label>
+      <select id="cd-period" onchange="renderContribDiv()"></select>
+      <div class="measure-btns">
+        <button class="mbtn active" id="cdmbtn-mensual" onclick="setCdMeasure('mensual')">Mensual</button>
+        <button class="mbtn" id="cdmbtn-acumulada" onclick="setCdMeasure('acumulada')">Acumulada</button>
+        <button class="mbtn" id="cdmbtn-a12m" onclick="setCdMeasure('a12m')">12 meses</button>
+      </div>
+      <input type="text" id="cd-search" placeholder="Buscar producto..." oninput="renderContribDiv()">
+    </div>
+    <div class="kpi-row" id="cd-kpis"></div>
+    <div class="card">
+      <div class="card-title"><span class="bar"></span>Contribuci&oacute;n de productos a la inflaci&oacute;n de la divisi&oacute;n</div>
+      <div class="contrib-wrap" id="cd-table"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// RAW se inyecta/carga externamente antes de llamar a initDashboard()
+var RAW = null;
+
+var S = {genMeasure:"mensual", divMeasure:"mensual", hmMeasure:"mensual", cgMeasure:"mensual", cdMeasure:"mensual"};
+var DIV_COLORS = ["#0054a6","#3fb950","#f85149","#d29922","#39d0d8","#bc8cff","#ff7b72","#79c0ff","#56d364","#ffa657","#ff6eb4","#a8daff"];
+var charts = {};
+
+function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function fmtPct(v){if(v===null||v===undefined)return"--";return(v>0?"+":"")+v.toFixed(2)+"%";}
+function fmtIpc(v){if(v===null||v===undefined)return"--";return v.toFixed(2);}
+function colorClass(v){if(v===null||v===undefined)return"neu";return v>0?"pos":v<0?"neg":"neu";}
+
+function heatColor(v){
+  if(v===null||v===undefined)return"background:#21262d;color:#8b949e";
+  var t=Math.min(Math.abs(v),8)/8;
+  var br=33,bg=38,bb=45,r,g,b;
+  if(v>0){r=Math.round(br+(248-br)*t);g=Math.round(bg+(81-bg)*t);b=Math.round(bb+(73-bb)*t);}
+  else   {r=Math.round(br+(63-br)*t); g=Math.round(bg+(185-bg)*t);b=Math.round(bb+(80-bb)*t);}
+  var txt=t>0.35?"#fff":"#8b949e";
+  return"background:rgb("+r+","+g+","+b+");color:"+txt;
+}
+
+function getFilteredLabels(fs,ts){
+  var all=RAW.date_labels,fi=all.indexOf(fs.value),ti=all.indexOf(ts.value);
+  return all.slice(fi,ti+1);
+}
+
+function makeKpi(label,val,sub,forceCls){
+  var cls=forceCls||colorClass(val);
+  return'<div class="kpi '+(cls==="pos"?"red":cls==="neg"?"green":"blue")+'">'
+    +'<div class="kpi-label">'+label+'</div>'
+    +'<div class="kpi-val '+cls+'">'+fmtPct(val)+'</div>'
+    +(sub?'<div class="kpi-sub">'+sub+'</div>':"")
+    +'</div>';
+}
+
+function chartOpts(unit){
+  return{responsive:true,animation:{duration:300},interaction:{mode:"index",intersect:false},
+    plugins:{
+      legend:{labels:{color:"#8b949e",font:{size:11},boxWidth:12}},
+      tooltip:{backgroundColor:"#161b22",borderColor:"#30363d",borderWidth:1,
+        titleColor:"#e6edf3",bodyColor:"#8b949e",
+        callbacks:{label:function(ctx){return" "+ctx.dataset.label+": "+(unit==="%"?fmtPct(ctx.raw):fmtIpc(ctx.raw));}}}
+    },
+    scales:{
+      x:{ticks:{color:"#8b949e",font:{size:10},maxTicksLimit:20},grid:{color:"#21262d"}},
+      y:{ticks:{color:"#8b949e",callback:function(v){return unit==="%"?v+"%":v;}},grid:{color:"#21262d"}}
+    }};
+}
+
+function initSelects(){
+  var all=RAW.date_labels, last=all[all.length-1];
+  ["gen-from","gen-to","div-from","div-to"].forEach(function(id){
+    var el=document.getElementById(id);
+    all.forEach(function(l){el.add(new Option(l,l));});
+    el.value=id.endsWith("-to")?last:all[0];
+  });
+  var ds=document.getElementById("sel-div");
+  Object.entries(RAW.divisions).forEach(function(e){ds.add(new Option(e[1],e[0]));});
+  var hy=document.getElementById("hm-year");
+  var years=[...new Set(all.map(function(l){return l.split("-")[1];}))];
+  years.forEach(function(y){hy.add(new Option(y,y));});
+  hy.value=last.split("-")[1];
+  ["cg-period","cd-period"].forEach(function(id){
+    var el=document.getElementById(id);
+    all.forEach(function(l){el.add(new Option(l,l));});
+    el.value=last;
+  });
+  var cdd=document.getElementById("cd-div");
+  Object.entries(RAW.divisions).forEach(function(e){cdd.add(new Option(e[1],e[0]));});
+  document.getElementById("hdr-range").textContent=all[0]+" -- "+last+"  |  "+all.length+" periodos";
+}
+
+// TAB GENERAL
+function setMeasure(m){
+  S.genMeasure=m;
+  ["mensual","acumulada","a12m"].forEach(function(x){document.getElementById("mbtn-"+x).classList.toggle("active",x===m);});
+  updateGeneral();
+}
+
+function updateGeneral(){
+  var labels=getFilteredLabels(document.getElementById("gen-from"),document.getElementById("gen-to"));
+  if(!labels.length)return;
+  var m=S.genMeasure,last=labels[labels.length-1],inf=RAW.inf_general;
+  var lv=RAW.ipc_general[last];
+  document.getElementById("gen-kpis").innerHTML=
+    makeKpi("Inflacion Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
+    +makeKpi("Inflacion Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
+    +makeKpi("Inflacion a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
+    +'<div class="kpi blue"><div class="kpi-label">Indice de Precios al Consumidor</div>'
+    +'<div class="kpi-val neu" style="font-size:20px">'+(lv!=null?lv.toFixed(2):"--")+'</div>'
+    +'<div class="kpi-sub">(Base 100 = 2016)</div></div>';
+  document.getElementById("gen-chart-title").textContent=
+    {mensual:"Variacion Mensual",acumulada:"Variacion Acumulada",a12m:"Variacion a 12 Meses"}[m];
+  destroyChart("gen-line");
+  charts["gen-line"]=new Chart(document.getElementById("chart-gen-line").getContext("2d"),{
+    type:"line",
+    data:{labels:labels,datasets:[{label:"Inflacion General",
+      data:labels.map(function(l){return inf[l]&&inf[l][m]!==undefined?inf[l][m]:null;}),
+      borderColor:"#0054a6",backgroundColor:"rgba(88,166,255,.08)",borderWidth:2,
+      pointRadius:labels.length>36?0:3,pointHoverRadius:5,fill:true,tension:.3}]},
+    options:chartOpts("%")});
+  destroyChart("gen-level");
+  charts["gen-level"]=new Chart(document.getElementById("chart-gen-level").getContext("2d"),{
+    type:"line",
+    data:{labels:labels,datasets:[{label:"IPC",
+      data:labels.map(function(l){return RAW.ipc_general[l]!=null?RAW.ipc_general[l]:null;}),
+      borderColor:"#d29922",backgroundColor:"rgba(210,153,34,.08)",borderWidth:2,
+      pointRadius:0,fill:true,tension:.3}]},
+    options:chartOpts("")});
+  var divVals=Object.keys(RAW.divisions).map(function(c){
+    return RAW.inf_div[c][last]&&RAW.inf_div[c][last][m]!==undefined?RAW.inf_div[c][last][m]:0;
+  });
+  var divNames=Object.values(RAW.divisions).map(function(n){return n.length>28?n.slice(0,26)+"...":n;});
+  destroyChart("div-bar");
+  charts["div-bar"]=new Chart(document.getElementById("chart-div-bar").getContext("2d"),{
+    type:"bar",
+    data:{labels:divNames,datasets:[{label:m,data:divVals,
+      backgroundColor:divVals.map(function(v){return v>0?"rgba(248,81,73,.75)":"rgba(63,185,80,.75)";}),
+      borderRadius:3}]},
+    options:Object.assign({},chartOpts("%"),{indexAxis:"y",
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:function(ctx){return fmtPct(ctx.raw);}}}
+      }})});
+}
+
+// TAB DIVISIONES
+function setDivMeasure(m){
+  S.divMeasure=m;
+  ["mensual","acumulada","a12m"].forEach(function(x){document.getElementById("dmbtn-"+x).classList.toggle("active",x===m);});
+  updateDivision();
+}
+
+function updateDivision(){
+  var labels=getFilteredLabels(document.getElementById("div-from"),document.getElementById("div-to"));
+  if(!labels.length)return;
+  var code=document.getElementById("sel-div").value,m=S.divMeasure;
+  var last=labels[labels.length-1],inf=RAW.inf_div[code],infG=RAW.inf_general;
+  var ci=Object.keys(RAW.divisions).indexOf(code);
+  document.getElementById("div-kpis").innerHTML=
+    makeKpi("Inflacion Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
+    +makeKpi("Inflacion Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
+    +makeKpi("Inflacion a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
+    +makeKpi("Inflacion general "+m,(infG[last]&&infG[last][m]!==undefined?infG[last][m]:null),"Referencia",
+      colorClass(infG[last]&&infG[last][m]!==undefined?infG[last][m]:null));
+  destroyChart("div-line");
+  charts["div-line"]=new Chart(document.getElementById("chart-div-line").getContext("2d"),{
+    type:"line",
+    data:{labels:labels,datasets:[
+      {label:"Inflacion en "+RAW.divisions[code],
+        data:labels.map(function(l){return inf[l]&&inf[l][m]!==undefined?inf[l][m]:null;}),
+        borderColor:DIV_COLORS[ci],backgroundColor:"transparent",borderWidth:2,
+        pointRadius:labels.length>36?0:3,tension:.3},
+      {label:"Inflacion General",
+        data:labels.map(function(l){return infG[l]&&infG[l][m]!==undefined?infG[l][m]:null;}),
+        borderColor:"#8b949e",backgroundColor:"transparent",borderWidth:1.5,
+        borderDash:[4,3],pointRadius:0,tension:.3}]},
+    options:chartOpts("%")});
+}
+
+// TAB HEATMAP
+function setHmMeasure(m){
+  S.hmMeasure=m;
+  ["mensual","acumulada","a12m"].forEach(function(x){document.getElementById("hmbtn-"+x).classList.toggle("active",x===m);});
+  renderHeatmap();
+}
+
+function renderHeatmap(){
+  var year=document.getElementById("hm-year").value, m=S.hmMeasure;
+  var ENM=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var ESM=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+  var labels=RAW.date_labels.filter(function(l){return l.indexOf("-"+year)>-1;});
+  var html='<table class="hm-table"><thead><tr><th>Division</th>';
+  labels.forEach(function(l){
+    var idx=ENM.indexOf(l.split("-")[0]);
+    html+='<th>'+(ESM[idx]||l.split("-")[0])+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+  Object.entries(RAW.divisions).forEach(function(entry){
+    var code=entry[0],name=entry[1];
+    var short=name.length>32?name.slice(0,30)+"...":name;
+    html+='<tr><td style="font-size:11px;color:var(--text);padding:5px 10px;white-space:nowrap;border:1px solid var(--border);text-align:left">'+short+'</td>';
+    labels.forEach(function(l){
+      var v=RAW.inf_div[code][l]&&RAW.inf_div[code][l][m]!==undefined?RAW.inf_div[code][l][m]:null;
+      var st=heatColor(v);
+      var d=(v!==null&&v!==undefined)?((v>0?"+":"")+v.toFixed(2)+"%"):"--";
+      html+='<td style="'+st+'" title="'+name+' | '+l+' | '+d+'">'+d+'</td>';
+    });
+    html+='</tr>';
+  });
+  html+='<tr><td style="font-size:11px;font-weight:600;color:var(--accent);padding:5px 10px;border:1px solid var(--border)">IPC General</td>';
+  labels.forEach(function(l){
+    var v=RAW.inf_general[l]&&RAW.inf_general[l][m]!==undefined?RAW.inf_general[l][m]:null;
+    var st=heatColor(v);
+    var d=(v!==null&&v!==undefined)?((v>0?"+":"")+v.toFixed(2)+"%"):"--";
+    html+='<td style="'+st+';font-weight:600" title="General | '+l+' | '+d+'">'+d+'</td>';
+  });
+  html+='</tr></tbody></table>';
+  document.getElementById("hm-container").innerHTML=html;
+}
+
+// TAB CONTRIB GENERAL
+function setCgMeasure(m){
+  S.cgMeasure=m;
+  ["mensual","acumulada","a12m"].forEach(function(x){document.getElementById("cgmbtn-"+x).classList.toggle("active",x===m);});
+  renderContribGeneral();
+}
+
+function renderContribGeneral(){
+  var period=document.getElementById("cg-period").value, m=S.cgMeasure;
+  var infGen=RAW.inf_general[period]&&RAW.inf_general[period][m]!==undefined?RAW.inf_general[period][m]:null;
+  var search=document.getElementById("cg-search").value.toLowerCase();
+  var data=RAW.contrib_general[m][period]||[];
+  var rows=data.filter(function(r){return !search||r.descripcion.toLowerCase().indexOf(search)>-1||r.div_name.toLowerCase().indexOf(search)>-1;});
+  document.getElementById("cg-kpis").innerHTML=
+    makeKpi("Inflacion "+(m==="mensual"?"Mensual":m==="acumulada"?"Acumulada":"a 12 meses"),infGen,period)
+    +'<div class="kpi blue"><div class="kpi-label">Periodo</div>'
+    +'<div class="kpi-val neu" style="font-size:18px">'+period+'</div></div>';
+  var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.contrib_gen);}).concat([0.001]));
+  var html='<table><thead><tr><th>#</th><th>Producto</th><th>Division</th>'
+    +'<th style="text-align:right">Pond. Global</th><th style="text-align:right">Contribucion</th>'
+    +'<th style="min-width:120px">Barra</th></tr></thead><tbody>';
+  rows.slice(0,50).forEach(function(r,i){
+    var bw=Math.round(Math.abs(r.contrib_gen)/maxAbs*100);
+    var bc=r.contrib_gen>0?"var(--warn)":"var(--accent2)";
+    var bc2=r.contrib_gen>0?"pos":r.contrib_gen<0?"neg":"neu";
+    html+='<tr><td style="color:var(--text2);font-family:var(--mono)">'+(i+1)+'</td>'
+      +'<td>'+r.descripcion+'</td><td style="color:var(--text2);font-size:11px">'+r.div_name+'</td>'
+      +'<td class="num">'+r.pond_global.toFixed(4)+'</td>'
+      +'<td class="num"><span class="badge '+bc2+'">'+fmtPct(r.contrib_gen)+'</span></td>'
+      +'<td><div class="contrib-bar" style="width:'+bw+'%;background:'+bc+'"></div></td></tr>';
+  });
+  html+='</tbody></table>';
+  if(rows.length>50)html+='<p style="color:var(--text2);font-size:11px;padding:8px 12px">Mostrando 50 de '+rows.length+' productos. Use el buscador para filtrar.</p>';
+  document.getElementById("cg-table").innerHTML=html;
+  renderStackedDiv(m);
+}
+
+function renderStackedDiv(measure){
+  var labels=RAW.date_labels;
+  var dc={};
+  Object.keys(RAW.divisions).forEach(function(c){dc[c]=[];});
+  labels.forEach(function(lbl){
+    var data=RAW.contrib_general[measure][lbl]||[];
+    var bd={};
+    data.forEach(function(r){bd[r.div_code]=(bd[r.div_code]||0)+r.contrib_gen;});
+    Object.keys(RAW.divisions).forEach(function(c){dc[c].push(bd[c]!==undefined?parseFloat(bd[c].toFixed(4)):null);});
+  });
+  destroyChart("cg-stacked");
+  charts["cg-stacked"]=new Chart(document.getElementById("chart-cg-stacked").getContext("2d"),{
+    type:"bar",
+    data:{labels:labels,datasets:Object.entries(RAW.divisions).map(function(e,i){
+      return{label:e[1].length>30?e[1].slice(0,28)+"...":e[1],
+        data:dc[e[0]],backgroundColor:DIV_COLORS[i]+"cc",borderColor:DIV_COLORS[i],
+        borderWidth:.5,stack:"stack"};
+    })},
+    options:Object.assign({},chartOpts("%"),{
+      scales:{
+        x:{stacked:true,ticks:{color:"#8b949e",font:{size:10},maxTicksLimit:20},grid:{color:"#21262d"}},
+        y:{stacked:true,ticks:{color:"#8b949e",callback:function(v){return v+"%";}},grid:{color:"#21262d"}}
+      },
+      plugins:{
+        legend:{labels:{color:"#8b949e",font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+": "+fmtPct(ctx.raw);}}}
+      }})});
+}
+
+// TAB CONTRIB DIV
+function setCdMeasure(m){
+  S.cdMeasure=m;
+  ["mensual","acumulada","a12m"].forEach(function(x){document.getElementById("cdmbtn-"+x).classList.toggle("active",x===m);});
+  renderContribDiv();
+}
+
+function renderContribDiv(){
+  var code=document.getElementById("cd-div").value;
+  var period=document.getElementById("cd-period").value, m=S.cdMeasure;
+  var search=document.getElementById("cd-search").value.toLowerCase();
+  var data=(RAW.contrib_data[code]&&RAW.contrib_data[code][m]&&RAW.contrib_data[code][m][period])||[];
+  var infDiv=RAW.inf_div[code][period]&&RAW.inf_div[code][period][m]!==undefined?RAW.inf_div[code][period][m]:null;
+  var infGen=RAW.inf_general[period]&&RAW.inf_general[period][m]!==undefined?RAW.inf_general[period][m]:null;
+  document.getElementById("cd-kpis").innerHTML=
+    makeKpi("Inflacion "+m+" de la division",infDiv,period)
+    +makeKpi("Inflacion General "+m,infGen,"referencia",colorClass(infGen))
+    +'<div class="kpi blue"><div class="kpi-label">Division</div>'
+    +'<div class="kpi-val neu" style="font-size:14px;line-height:1.4">'+RAW.divisions[code]+'</div></div>';
+  var rows=data.filter(function(r){return !search||r.descripcion.toLowerCase().indexOf(search)>-1;});
+  var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.contrib_div);}).concat([0.001]));
+  var totalDiv=rows.reduce(function(s,r){return s+r.contrib_div;},0);
+  var totalGen=rows.reduce(function(s,r){return s+r.contrib_gen;},0);
+  var html='<table><thead><tr><th>#</th><th>Producto</th>'
+    +'<th style="text-align:right">Pond. Division</th><th style="text-align:right">Pond. Global</th>'
+    +'<th style="text-align:right">Contrib. Division</th><th style="text-align:right">Contrib. General</th>'
+    +'<th style="min-width:120px">Barra</th></tr></thead><tbody>';
+  rows.forEach(function(r,i){
+    var bw=Math.round(Math.abs(r.contrib_div)/maxAbs*100);
+    var bc=r.contrib_div>0?"var(--warn)":"var(--accent2)";
+    var bc2=r.contrib_div>0?"pos":r.contrib_div<0?"neg":"neu";
+    var gc=r.contrib_gen>0?"pos":r.contrib_gen<0?"neg":"neu";
+    html+='<tr><td style="color:var(--text2);font-family:var(--mono)">'+(i+1)+'</td>'
+      +'<td>'+r.descripcion+'</td>'
+      +'<td class="num">'+r.pond_div.toFixed(4)+'</td><td class="num">'+r.pond_global.toFixed(4)+'</td>'
+      +'<td class="num"><span class="badge '+bc2+'">'+fmtPct(r.contrib_div)+'</span></td>'
+      +'<td class="num"><span class="badge '+gc+'">'+fmtPct(r.contrib_gen)+'</span></td>'
+      +'<td><div class="contrib-bar" style="width:'+bw+'%;background:'+bc+'"></div></td></tr>';
+  });
+  var genCls=totalGen>0?"pos":totalGen<0?"neg":"neu";
+  html+='<tr style="border-top:2px solid var(--border)">'
+    +'<td colspan="4" style="font-weight:600;padding:8px 12px;color:var(--accent)">TOTAL COMPUTADO</td>'
+    +'<td class="num"><span class="badge '+(totalDiv>0?"pos":totalDiv<0?"neg":"neu")+'">'+fmtPct(totalDiv)+'</span></td>'
+    +'<td class="num"><span class="badge '+genCls+'">'+fmtPct(totalGen)+'</span></td>'
+    +'<td></td></tr>';
+  html+='</tbody></table>';
+  document.getElementById("cd-table").innerHTML=html;
+}
+
+function switchTab(name){
+  var tabs=["general","divisiones","heatmap","contrib_gen","contrib_div"];
+  document.querySelectorAll(".tab").forEach(function(t,i){t.classList.toggle("active",tabs[i]===name);});
+  document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.toggle("active",p.id==="tab-"+name);});
+  if(name==="divisiones")updateDivision();
+  if(name==="heatmap")renderHeatmap();
+  if(name==="contrib_gen")renderContribGeneral();
+  if(name==="contrib_div")renderContribDiv();
+}
+
+function initDashboard(data){
+  RAW = data;
+  initSelects();
+  updateGeneral();
+  setTimeout(function(){document.getElementById("loading").style.display="none";},300);
+}
+
+// Carga el JSON externo si existe, o espera a que sea inyectado
+function loadData(){
+  fetch("dashboard_data.json")
+    .then(function(r){
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      initDashboard(data);
+    })
+    .catch(function(err){
+      // Si falla el fetch (p.ej. apertura local sin servidor),
+      // intenta usar datos incrustados (variable global INLINE_DATA)
+      if(typeof INLINE_DATA !== "undefined"){
+        initDashboard(INLINE_DATA);
+      } else {
+        document.getElementById("loading").style.display="none";
+        var em=document.getElementById("error-msg");
+        em.style.display="block";
+        em.textContent="No se pudo cargar dashboard_data.json. Si estas abriendo el archivo localmente (file://), necesitas un servidor web o usar la version con datos incrustados.";
+      }
+    });
+}
+
+window.addEventListener("DOMContentLoaded", loadData);
+</script>
+</body>
+</html>
