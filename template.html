@@ -82,7 +82,7 @@ input[type=text]:focus{border-color:var(--accent)}
     <button class="tab active" onclick="switchTab('general')">IPC General</button>
     <button class="tab" onclick="switchTab('divisiones')">Por Divisi&oacute;n</button>
     <button class="tab" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
-    <button class="tab" onclick="switchTab('contrib_gen')">Contribuciones al IPC</button>
+    <button class="tab" onclick="switchTab('contrib_gen')">Contribuciones a la inflación</button>
     <button class="tab" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
   </div>
 
@@ -294,9 +294,9 @@ function updateGeneral(){
   var m=S.genMeasure,last=labels[labels.length-1],inf=RAW.inf_general;
   var lv=RAW.ipc_general[last];
   document.getElementById("gen-kpis").innerHTML=
-    makeKpi("Inflacion Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
-    +makeKpi("Inflacion Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
-    +makeKpi("Inflacion a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
+    makeKpi("Inflación Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
+    +makeKpi("Inflación Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
+    +makeKpi("Inflación a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
     +'<div class="kpi blue"><div class="kpi-label">Indice de Precios al Consumidor</div>'
     +'<div class="kpi-val neu" style="font-size:20px">'+(lv!=null?lv.toFixed(2):"--")+'</div>'
     +'<div class="kpi-sub">(Base 100 = 2016)</div></div>';
@@ -305,7 +305,7 @@ function updateGeneral(){
   destroyChart("gen-line");
   charts["gen-line"]=new Chart(document.getElementById("chart-gen-line").getContext("2d"),{
     type:"line",
-    data:{labels:labels,datasets:[{label:"Inflacion General",
+    data:{labels:labels,datasets:[{label:"Inflación General",
       data:labels.map(function(l){return inf[l]&&inf[l][m]!==undefined?inf[l][m]:null;}),
       borderColor:"#0054a6",backgroundColor:"rgba(88,166,255,.08)",borderWidth:2,
       pointRadius:labels.length>36?0:3,pointHoverRadius:5,fill:true,tension:.3}]},
@@ -348,20 +348,20 @@ function updateDivision(){
   var last=labels[labels.length-1],inf=RAW.inf_div[code],infG=RAW.inf_general;
   var ci=Object.keys(RAW.divisions).indexOf(code);
   document.getElementById("div-kpis").innerHTML=
-    makeKpi("Inflacion Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
-    +makeKpi("Inflacion Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
-    +makeKpi("Inflacion a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
-    +makeKpi("Inflacion general "+m,(infG[last]&&infG[last][m]!==undefined?infG[last][m]:null),"Referencia",
+    makeKpi("Inflación Mensual",(inf[last]&&inf[last].mensual!==undefined?inf[last].mensual:null),last)
+    +makeKpi("Inflación Acumulada",(inf[last]&&inf[last].acumulada!==undefined?inf[last].acumulada:null),last)
+    +makeKpi("Inflación a 12 meses",(inf[last]&&inf[last].a12m!==undefined?inf[last].a12m:null),last)
+    +makeKpi("Inflación general "+m,(infG[last]&&infG[last][m]!==undefined?infG[last][m]:null),"Referencia",
       colorClass(infG[last]&&infG[last][m]!==undefined?infG[last][m]:null));
   destroyChart("div-line");
   charts["div-line"]=new Chart(document.getElementById("chart-div-line").getContext("2d"),{
     type:"line",
     data:{labels:labels,datasets:[
-      {label:"Inflacion en "+RAW.divisions[code],
+      {label:"Inflación en "+RAW.divisions[code],
         data:labels.map(function(l){return inf[l]&&inf[l][m]!==undefined?inf[l][m]:null;}),
         borderColor:DIV_COLORS[ci],backgroundColor:"transparent",borderWidth:2,
         pointRadius:labels.length>36?0:3,tension:.3},
-      {label:"Inflacion General",
+      {label:"Inflación General",
         data:labels.map(function(l){return infG[l]&&infG[l][m]!==undefined?infG[l][m]:null;}),
         borderColor:"#8b949e",backgroundColor:"transparent",borderWidth:1.5,
         borderDash:[4,3],pointRadius:0,tension:.3}]},
@@ -423,7 +423,7 @@ function renderContribGeneral(){
   var data=RAW.contrib_general[m][period]||[];
   var rows=data.filter(function(r){return !search||r.descripcion.toLowerCase().indexOf(search)>-1||r.div_name.toLowerCase().indexOf(search)>-1;});
   document.getElementById("cg-kpis").innerHTML=
-    makeKpi("Inflacion "+(m==="mensual"?"Mensual":m==="acumulada"?"Acumulada":"a 12 meses"),infGen,period)
+    makeKpi("Inflación "+(m==="mensual"?"Mensual":m==="acumulada"?"Acumulada":"a 12 meses"),infGen,period)
     +'<div class="kpi blue"><div class="kpi-label">Periodo</div>'
     +'<div class="kpi-val neu" style="font-size:18px">'+period+'</div></div>';
   var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.contrib_gen);}).concat([0.001]));
@@ -490,9 +490,9 @@ function renderContribDiv(){
   var infDiv=RAW.inf_div[code][period]&&RAW.inf_div[code][period][m]!==undefined?RAW.inf_div[code][period][m]:null;
   var infGen=RAW.inf_general[period]&&RAW.inf_general[period][m]!==undefined?RAW.inf_general[period][m]:null;
   document.getElementById("cd-kpis").innerHTML=
-    makeKpi("Inflacion "+m+" de la division",infDiv,period)
-    +makeKpi("Inflacion General "+m,infGen,"referencia",colorClass(infGen))
-    +'<div class="kpi blue"><div class="kpi-label">Division</div>'
+    makeKpi("Inflación "+m+" de la división",infDiv,period)
+    +makeKpi("Inflación General "+m,infGen,"referencia",colorClass(infGen))
+    +'<div class="kpi blue"><div class="kpi-label">División</div>'
     +'<div class="kpi-val neu" style="font-size:14px;line-height:1.4">'+RAW.divisions[code]+'</div></div>';
   var rows=data.filter(function(r){return !search||r.descripcion.toLowerCase().indexOf(search)>-1;});
   var maxAbs=Math.max.apply(null,rows.map(function(r){return Math.abs(r.contrib_div);}).concat([0.001]));

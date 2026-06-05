@@ -2,7 +2,7 @@
 #  Dashboard IPC Bolivia - Versión con JSON externo y plantilla HTML separada
 #  Genera:
 #    - dashboard_data.json (datos ligeros, solo top contribuciones)
-#    - dashboard.html      (interfaz que carga el JSON, a partir de template.html)
+#    - index.html      (interfaz que carga el JSON, a partir de template.html)
 # =============================================================================
 
 library(readxl)
@@ -11,13 +11,13 @@ library(dplyr)
 library(lubridate)
 library(stringr)
 
-# -- Rutas (ajústalas a tu entorno) -----------------------------------------
+# -- Rutas -----------------------------------------
 path_ipc  <- "D:/Usuario/Desktop/Inflación/IPC producto.xlsx"
 path_pond <- "D:/Usuario/Desktop/Inflación/Ponderaciones IPC.xlsx"
 dir_out   <- "D:/Usuario/Desktop/Inflación/Contribuciones por producto a la inflacion/"
 
-# Ruta de tu plantilla HTML (puede ser absoluta o relativa)
-template_file <- file.path(dir_out, "template.html")  # Ajusta si está en otra carpeta
+# Ruta de tu plantilla HTML
+template_file <- file.path(dir_out, "template.html")
 
 # -- Parámetros de recorte -------------------------------------------------
 TOP_GENERAL <- 50   # productos más influyentes en IPC General
@@ -252,7 +252,7 @@ cat("  Tamaño JSON:", round(file.size(json_file)/1024), "KB\n")
 # ==========================================================================
 #  GENERAR HTML A PARTIR DE PLANTILLA EXTERNA
 # ==========================================================================
-html_output <- file.path(dir_out, "dashboard_contribucion_ipc.html")
+html_output <- file.path(dir_out, "index.html")
 
 if (file.exists(template_file)) {
   cat("Leyendo plantilla HTML desde", template_file, "...\n")
@@ -269,7 +269,7 @@ if (file.exists(template_file)) {
                        'onclick="\\1(\'\\2\')"', 
                        html_content)
   
-  # Opcional: Puedes añadir un marcador de fecha si tu plantilla lo usa
+  # Opcional: marcador de fecha
   # html_content <- gsub("\\{\\{FECHA_GENERACION\\}\\}", Sys.time(), html_content)
   
   # Escribir el archivo final
