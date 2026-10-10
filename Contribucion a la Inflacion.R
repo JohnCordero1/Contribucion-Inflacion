@@ -12,9 +12,14 @@ library(lubridate)
 library(stringr)
 
 # -- Rutas -----------------------------------------
-path_ipc  <- "D:/Usuario/Desktop/Inflación/IPC producto.xlsx"
-path_pond <- "D:/Usuario/Desktop/Inflación/Ponderaciones IPC.xlsx"
-dir_out   <- "D:/Usuario/Desktop/Inflación/Contribuciones por producto a la inflacion/"
+base_dir  <- "D:/Usuario/Desktop/Inflación/"
+path_ipc  <- file.path(base_dir, "IPC producto.xlsx")
+path_pond <- file.path(base_dir, "Ponderaciones IPC.xlsx")
+dir_out   <- file.path(base_dir, "Contribuciones por producto a la inflacion/")
+
+# Verificar que los archivos existen
+if (!file.exists(path_ipc))  stop("No se encuentra: ", path_ipc)
+if (!file.exists(path_pond)) stop("No se encuentra: ", path_pond)
 
 # Ruta de tu plantilla HTML
 template_file <- file.path(dir_out, "template.html")
@@ -26,10 +31,18 @@ TOP_DIV      <- 30   # productos más influyentes dentro de cada división
 # Asegurar directorio de salida
 if(!dir.exists(dir_out)) dir.create(dir_out, recursive = TRUE)
 
+# -- Configuración -----------------------------------------------------------
+TOP_GENERAL <- 50
+TOP_DIV      <- 30
+JSON_DIGITS  <- 6
+
 # -- Lectura ----------------------------------------------------------------
 cat("Leyendo archivos...\n")
-df_ipc  <- read_excel(path_ipc)
-df_pond <- read_excel(path_pond)
+t_read <- system.time({
+  df_ipc  <- read_excel(path_ipc)
+  df_pond <- read_excel(path_pond)
+})
+cat(sprintf("  Lectura completada en %.2fs\n", t_read[["elapsed"]]))
 
 clean_cod <- function(x) {
   x <- as.character(x)
@@ -245,9 +258,11 @@ data_out <- list(
 # -- Guardar JSON externo --------------------------------------------------
 json_file <- file.path(dir_out, "dashboard_data.json")
 cat("Serializando JSON a", json_file, "...\n")
-json_raw  <- toJSON(data_out, auto_unbox = TRUE, null = "null", na = "null", digits = 3)
-writeLines(json_raw, json_file, useBytes = TRUE)
-cat("  Tamaño JSON:", round(file.size(json_file)/1024), "KB\n")
+t_json <- system.time({
+  json_raw  <- toJSON(data_out, auto_unbox = TRUE, null = "null", na = "null", digits = JSON_DIGITS)
+  writeLines(json_raw, json_file, useBytes = TRUE)
+})
+cat(sprintf("  Tamaño JSON: %d KB (%.2fs)\n", round(file.size(json_file)/1024), t_json[["elapsed"]]))
 
 # ==========================================================================
 #  GENERAR HTML A PARTIR DE PLANTILLA EXTERNA
@@ -286,4 +301,4 @@ cat("\n=== Proceso completado ===\n")
 cat("Archivos generados:\n")
 cat("  -", json_file, "\n")
 cat("  -", html_output, "\n")
-cat("\nAbre", html_output, "en tu navegador (ambos archivos deben estar en la misma carpeta).\n")
+cat("\nAbre", html_output, "en tu navegador.\n")

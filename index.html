@@ -10,14 +10,14 @@
 :root{
   --bg:#ffffff;--bg2:#f6f8fa;--bg3:#eaeef2;--border:#d0d7de;
   --text:#1f2328;--text2:#656d76;
-  --accent:#0969da;--accent2:#1a7f37;--warn:#cf222e;--gold:#9a6700;
+  --accent:#0969da;--accent2:#1a7f37;--warn:#cf222e;--gold:#9a6700;--info:#39d0d8;
   --hm-base:236,240,244;
   --font:"IBM Plex Sans",sans-serif;--mono:"IBM Plex Mono",monospace;
 }
 [data-theme="dark"]{
   --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
   --text:#e6edf3;--text2:#8b949e;
-  --accent:#0054a6;--accent2:#3fb950;--warn:#f85149;--gold:#d29922;
+  --accent:#0054a6;--accent2:#3fb950;--warn:#f85149;--gold:#d29922;--info:#39d0d8;
   --hm-base:33,38,45;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -33,6 +33,7 @@ header h1{font-size:15px;font-weight:500}
 .tab{padding:7px 14px;border-radius:5px;cursor:pointer;font-size:13px;color:var(--text2);white-space:nowrap;transition:all .15s;border:none;background:none}
 .tab:hover{color:var(--text);background:var(--bg3)}.tab.active{background:var(--accent);color:#fff;font-weight:500}
 .tab-panel{display:none}.tab-panel.active{display:block}
+.tab-panel[role="tabpanel"]{display:none}.tab-panel[role="tabpanel"].active{display:block}
 .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:20px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px}
 .controls label{font-size:12px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 select{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:5px;font-size:13px;font-family:var(--font);cursor:pointer;outline:none}
@@ -76,6 +77,7 @@ input[type=text]:focus{border-color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading p{color:var(--text2);font-size:13px}
 #error-msg{display:none;background:rgba(248,81,73,.1);border:1px solid var(--warn);border-radius:8px;padding:16px 20px;color:var(--warn);font-size:13px;margin-bottom:20px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
 </head>
 <body>
@@ -83,27 +85,27 @@ input[type=text]:focus{border-color:var(--accent)}
 <header>
   <div class="logo">Fuente &middot; INE Bolivia</div>
   <h1>Dashboard de la Inflaci&oacute;n para Bolivia</h1>
-  <button id="theme-toggle" onclick="toggleTheme()">☀️ Claro</button>
+  <button id="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema (claro/oscuro)">☀️ Claro</button>
   <div class="subtitle" id="hdr-range"></div>
 </header>
 <div class="container">
   <div id="error-msg"></div>
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('general')">IPC General</button>
-    <button class="tab" onclick="switchTab('divisiones')">Por Divisi&oacute;n</button>
-    <button class="tab" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
-    <button class="tab" onclick="switchTab('contrib_gen')">Contribuciones a la inflación</button>
-    <button class="tab" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
+  <div class="tabs" role="tablist" aria-label="Secciones del dashboard">
+    <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-general" onclick="switchTab('general')">IPC General</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-divisiones" onclick="switchTab('divisiones')">Por Divisi&oacute;n</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-heatmap" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_gen" onclick="switchTab('contrib_gen')">Contribuciones a la inflación</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_div" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
   </div>
 
   <!-- TAB GENERAL -->
-  <div class="tab-panel active" id="tab-general">
+  <div class="tab-panel active" id="tab-general" role="tabpanel" aria-labelledby="tab-general">
     <div class="controls">
-      <label>Periodo</label>
-      <select id="gen-from" onchange="updateGeneral()"></select>
-      <span style="color:var(--text2)">&#8594;</span>
-      <select id="gen-to" onchange="updateGeneral()"></select>
-      <div class="measure-btns">
+      <label id="gen-period-label">Periodo</label>
+      <select id="gen-from" aria-labelledby="gen-period-label" onchange="updateGeneral()"></select>
+      <span style="color:var(--text2)" aria-hidden="true">&#8594;</span>
+      <select id="gen-to" aria-label="Hasta" onchange="updateGeneral()"></select>
+      <div class="measure-btns" role="group" aria-label="Tipo de inflación">
         <button class="mbtn active" id="mbtn-mensual" onclick="setMeasure('mensual')">Mensual</button>
         <button class="mbtn" id="mbtn-acumulada" onclick="setMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="mbtn-a12m" onclick="setMeasure('a12m')">12 meses</button>
@@ -127,15 +129,15 @@ input[type=text]:focus{border-color:var(--accent)}
   </div>
 
   <!-- TAB DIVISIONES -->
-  <div class="tab-panel" id="tab-divisiones">
+  <div class="tab-panel" id="tab-divisiones" role="tabpanel" aria-labelledby="tab-divisiones">
     <div class="controls">
-      <label>Divisi&oacute;n</label>
-      <select id="sel-div" onchange="updateDivision()"></select>
-      <label>Periodo</label>
-      <select id="div-from" onchange="updateDivision()"></select>
-      <span style="color:var(--text2)">&#8594;</span>
-      <select id="div-to" onchange="updateDivision()"></select>
-      <div class="measure-btns">
+      <label id="div-div-label">Divisi&oacute;n</label>
+      <select id="sel-div" aria-labelledby="div-div-label" onchange="updateDivision()"></select>
+      <label id="div-period-label">Periodo</label>
+      <select id="div-from" aria-labelledby="div-period-label" onchange="updateDivision()"></select>
+      <span style="color:var(--text2)" aria-hidden="true">&#8594;</span>
+      <select id="div-to" aria-label="Hasta" onchange="updateDivision()"></select>
+      <div class="measure-btns" role="group" aria-label="Tipo de inflación">
         <button class="mbtn active" id="dmbtn-mensual" onclick="setDivMeasure('mensual')">Mensual</button>
         <button class="mbtn" id="dmbtn-acumulada" onclick="setDivMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="dmbtn-a12m" onclick="setDivMeasure('a12m')">12 meses</button>
@@ -149,16 +151,16 @@ input[type=text]:focus{border-color:var(--accent)}
   </div>
 
   <!-- TAB HEATMAP -->
-  <div class="tab-panel" id="tab-heatmap">
+  <div class="tab-panel" id="tab-heatmap" role="tabpanel" aria-labelledby="tab-heatmap">
     <div class="controls">
-      <label>Medida</label>
-      <div class="measure-btns">
+      <label id="hm-measure-label">Medida</label>
+      <div class="measure-btns" role="group" aria-labelledby="hm-measure-label">
         <button class="mbtn active" id="hmbtn-mensual" onclick="setHmMeasure('mensual')">Mensual</button>
         <button class="mbtn" id="hmbtn-acumulada" onclick="setHmMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="hmbtn-a12m" onclick="setHmMeasure('a12m')">12 meses</button>
       </div>
-      <label>A&ntilde;o</label>
-      <select id="hm-year" onchange="renderHeatmap()"></select>
+      <label id="hm-year-label">A&ntilde;o</label>
+      <select id="hm-year" aria-labelledby="hm-year-label" onchange="renderHeatmap()"></select>
     </div>
     <div class="card">
       <div class="card-title"><span class="bar"></span>Inflaci&oacute;n por Divisi&oacute;n y Mes</div>
@@ -173,15 +175,16 @@ input[type=text]:focus{border-color:var(--accent)}
   </div>
 
   <!-- TAB CONTRIB GENERAL -->
-  <div class="tab-panel" id="tab-contrib_gen">
+  <div class="tab-panel" id="tab-contrib_gen" role="tabpanel" aria-labelledby="tab-contrib_gen">
     <div class="controls">
-      <label>Periodo</label>
-      <select id="cg-period" onchange="renderContribGeneral()"></select>
-      <div class="measure-btns">
+      <label id="cg-period-label">Periodo</label>
+      <select id="cg-period" aria-labelledby="cg-period-label" onchange="renderContribGeneral()"></select>
+      <div class="measure-btns" role="group" aria-label="Tipo de inflación">
         <button class="mbtn active" id="cgmbtn-mensual" onclick="setCgMeasure('mensual')">Mensual</button>
         <button class="mbtn" id="cgmbtn-acumulada" onclick="setCgMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="cgmbtn-a12m" onclick="setCgMeasure('a12m')">12 meses</button>
       </div>
+      <label for="cg-search" class="sr-only">Buscar producto</label>
       <input type="text" id="cg-search" placeholder="Buscar producto..." oninput="renderContribGeneral()">
     </div>
     <div class="kpi-row" id="cg-kpis"></div>
@@ -196,17 +199,18 @@ input[type=text]:focus{border-color:var(--accent)}
   </div>
 
   <!-- TAB CONTRIB DIV -->
-  <div class="tab-panel" id="tab-contrib_div">
+  <div class="tab-panel" id="tab-contrib_div" role="tabpanel" aria-labelledby="tab-contrib_div">
     <div class="controls">
-      <label>Divisi&oacute;n</label>
-      <select id="cd-div" onchange="renderContribDiv()"></select>
-      <label>Periodo</label>
-      <select id="cd-period" onchange="renderContribDiv()"></select>
-      <div class="measure-btns">
+      <label id="cd-div-label">Divisi&oacute;n</label>
+      <select id="cd-div" aria-labelledby="cd-div-label" onchange="renderContribDiv()"></select>
+      <label id="cd-period-label">Periodo</label>
+      <select id="cd-period" aria-labelledby="cd-period-label" onchange="renderContribDiv()"></select>
+      <div class="measure-btns" role="group" aria-label="Tipo de inflación">
         <button class="mbtn active" id="cdmbtn-mensual" onclick="setCdMeasure('mensual')">Mensual</button>
         <button class="mbtn" id="cdmbtn-acumulada" onclick="setCdMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="cdmbtn-a12m" onclick="setCdMeasure('a12m')">12 meses</button>
       </div>
+      <label for="cd-search" class="sr-only">Buscar producto</label>
       <input type="text" id="cd-search" placeholder="Buscar producto..." oninput="renderContribDiv()">
     </div>
     <div class="kpi-row" id="cd-kpis"></div>
@@ -222,8 +226,20 @@ input[type=text]:focus{border-color:var(--accent)}
 var RAW = null;
 
 var S = {genMeasure:"mensual", divMeasure:"mensual", hmMeasure:"mensual", cgMeasure:"mensual", cdMeasure:"mensual"};
-var DIV_COLORS = ["#0054a6","#3fb950","#f85149","#d29922","#39d0d8","#bc8cff","#ff7b72","#79c0ff","#56d364","#ffa657","#ff6eb4","#a8daff"];
+function getDivColors() {
+  var root = getComputedStyle(document.documentElement);
+  return [
+    root.getPropertyValue("--accent").trim() || "#0054a6",
+    root.getPropertyValue("--accent2").trim() || "#3fb950",
+    root.getPropertyValue("--warn").trim() || "#f85149",
+    root.getPropertyValue("--gold").trim() || "#d29922",
+    root.getPropertyValue("--info", "#39d0d8").trim() || "#39d0d8",
+    "#bc8cff", "#ff7b72", "#79c0ff", "#56d364", "#ffa657", "#ff6eb4", "#a8daff"
+  ];
+}
+var DIV_COLORS = getDivColors();
 var charts = {};
+var STACKED_CACHE = null;
 
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 function destroyChart(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
@@ -319,7 +335,7 @@ function updateGeneral(){
     type:"line",
     data:{labels:labels,datasets:[{label:"Inflación General",
       data:labels.map(function(l){return inf[l]&&inf[l][m]!==undefined?inf[l][m]:null;}),
-      borderColor:"#0054a6",backgroundColor:"rgba(88,166,255,.08)",borderWidth:2,
+      borderColor:cssVar("--accent"),backgroundColor:cssVar("--accent")+"20",borderWidth:2,
       pointRadius:labels.length>36?0:3,pointHoverRadius:5,fill:true,tension:.3}]},
     options:chartOpts("%")});
   destroyChart("gen-level");
@@ -327,7 +343,7 @@ function updateGeneral(){
     type:"line",
     data:{labels:labels,datasets:[{label:"IPC",
       data:labels.map(function(l){return RAW.ipc_general[l]!=null?RAW.ipc_general[l]:null;}),
-      borderColor:"#d29922",backgroundColor:"rgba(210,153,34,.08)",borderWidth:2,
+      borderColor:cssVar("--gold"),backgroundColor:cssVar("--gold")+"20",borderWidth:2,
       pointRadius:0,fill:true,tension:.3}]},
     options:chartOpts("")});
   var divVals=Object.keys(RAW.divisions).map(function(c){
@@ -338,7 +354,7 @@ function updateGeneral(){
   charts["div-bar"]=new Chart(document.getElementById("chart-div-bar").getContext("2d"),{
     type:"bar",
     data:{labels:divNames,datasets:[{label:m,data:divVals,
-      backgroundColor:divVals.map(function(v){return v>0?"rgba(248,81,73,.75)":"rgba(63,185,80,.75)";}),
+      backgroundColor:divVals.map(function(v){return v>0?cssVar("--warn")+"BF":cssVar("--accent2")+"BF";}),
       borderRadius:3}]},
     options:Object.assign({},chartOpts("%"),{indexAxis:"y",
       plugins:{legend:{display:false},
@@ -375,7 +391,7 @@ function updateDivision(){
         pointRadius:labels.length>36?0:3,tension:.3},
       {label:"Inflación General",
         data:labels.map(function(l){return infG[l]&&infG[l][m]!==undefined?infG[l][m]:null;}),
-        borderColor:"#8b949e",backgroundColor:"transparent",borderWidth:1.5,
+        borderColor:cssVar("--text2"),backgroundColor:"transparent",borderWidth:1.5,
         borderDash:[4,3],pointRadius:0,tension:.3}]},
     options:chartOpts("%")});
 }
@@ -460,20 +476,13 @@ function renderContribGeneral(){
 
 function renderStackedDiv(measure){
   var labels=RAW.date_labels;
-  var dc={};
-  Object.keys(RAW.divisions).forEach(function(c){dc[c]=[];});
-  labels.forEach(function(lbl){
-    var data=RAW.contrib_general[measure][lbl]||[];
-    var bd={};
-    data.forEach(function(r){bd[r.div_code]=(bd[r.div_code]||0)+r.contrib_gen;});
-    Object.keys(RAW.divisions).forEach(function(c){dc[c].push(bd[c]!==undefined?parseFloat(bd[c].toFixed(4)):null);});
-  });
+  var dc = STACKED_CACHE && STACKED_CACHE[measure] ? STACKED_CACHE[measure] : {};
   destroyChart("cg-stacked");
   charts["cg-stacked"]=new Chart(document.getElementById("chart-cg-stacked").getContext("2d"),{
     type:"bar",
     data:{labels:labels,datasets:Object.entries(RAW.divisions).map(function(e,i){
       return{label:e[1].length>30?e[1].slice(0,28)+"...":e[1],
-        data:dc[e[0]],backgroundColor:DIV_COLORS[i]+"cc",borderColor:DIV_COLORS[i],
+        data:dc[e[0]]||[],backgroundColor:(DIV_COLORS[i]||cssVar("--accent"))+"CC",borderColor:DIV_COLORS[i]||cssVar("--accent"),
         borderWidth:.5,stack:"stack"};
     })},
     options:Object.assign({},chartOpts("%"),{
@@ -543,6 +552,7 @@ function toggleTheme(){
   d.setAttribute("data-theme",next);
   localStorage.setItem("theme",next);
   document.getElementById("theme-toggle").textContent=next==="light"?"☀️ Claro":"🌙 Oscuro";
+  DIV_COLORS = getDivColors();
   Object.keys(charts).forEach(destroyChart);
   var active=document.querySelector(".tab-panel.active");
   if(active)switchTab(active.id.replace("tab-",""));
@@ -551,7 +561,10 @@ function toggleTheme(){
 
 function switchTab(name){
   var tabs=["general","divisiones","heatmap","contrib_gen","contrib_div"];
-  document.querySelectorAll(".tab").forEach(function(t,i){t.classList.toggle("active",tabs[i]===name);});
+  document.querySelectorAll(".tab").forEach(function(t,i){
+    t.classList.toggle("active",tabs[i]===name);
+    t.setAttribute("aria-selected", tabs[i]===name);
+  });
   document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.toggle("active",p.id==="tab-"+name);});
   if(name==="divisiones")updateDivision();
   if(name==="heatmap")renderHeatmap();
@@ -565,8 +578,28 @@ function initDashboard(data){
   if(saved)document.documentElement.setAttribute("data-theme",saved);
   document.getElementById("theme-toggle").textContent=saved==="dark"?"🌙 Oscuro":"☀️ Claro";
   initSelects();
+  precomputeStackedData();
   updateGeneral();
   setTimeout(function(){document.getElementById("loading").style.display="none";},300);
+}
+
+function precomputeStackedData(){
+  var labels=RAW.date_labels;
+  var dc={};
+  Object.keys(RAW.divisions).forEach(function(c){dc[c]=[];});
+  ["mensual","acumulada","a12m"].forEach(function(m){
+    dc[m]={};
+    Object.keys(RAW.divisions).forEach(function(c){dc[m][c]=[];});
+    labels.forEach(function(lbl){
+      var data=RAW.contrib_general[m][lbl]||[];
+      var bd={};
+      data.forEach(function(r){bd[r.div_code]=(bd[r.div_code]||0)+r.contrib_gen;});
+      Object.keys(RAW.divisions).forEach(function(c){
+        dc[m][c].push(bd[c]!==undefined?parseFloat(bd[c].toFixed(4)):null);
+      });
+    });
+  });
+  STACKED_CACHE = dc;
 }
 
 // Carga el JSON externo si existe, o espera a que sea inyectado
