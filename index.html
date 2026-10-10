@@ -559,6 +559,10 @@ function toggleTheme(){
     var active=document.querySelector(".tab-panel.active");
     if(active)switchTab(active.id.replace("tab-",""));
     else updateGeneral();
+    // Second frame: ensure charts resize after layout
+    requestAnimationFrame(function(){
+      Object.values(charts).forEach(function(c){ if(c && c.resize) c.resize(); });
+    });
   });
 }
 
@@ -569,6 +573,8 @@ function switchTab(name){
     t.setAttribute("aria-selected", tabs[i]===name);
   });
   document.querySelectorAll(".tab-panel").forEach(function(p){p.classList.toggle("active",p.id==="tab-"+name);});
+  // Force reflow so canvas gets dimensions before chart creation
+  void document.querySelector(".tab-panel.active").offsetHeight;
   if(name==="divisiones")updateDivision();
   if(name==="heatmap")renderHeatmap();
   if(name==="contrib_gen")renderContribGeneral();
