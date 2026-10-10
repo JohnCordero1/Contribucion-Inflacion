@@ -552,11 +552,14 @@ function toggleTheme(){
   d.setAttribute("data-theme",next);
   localStorage.setItem("theme",next);
   document.getElementById("theme-toggle").textContent=next==="light"?"☀️ Claro":"🌙 Oscuro";
-  DIV_COLORS = getDivColors();
-  Object.keys(charts).forEach(destroyChart);
-  var active=document.querySelector(".tab-panel.active");
-  if(active)switchTab(active.id.replace("tab-",""));
-  else updateGeneral();
+  
+  requestAnimationFrame(function(){
+    DIV_COLORS = getDivColors();
+    Object.keys(charts).forEach(destroyChart);
+    var active=document.querySelector(".tab-panel.active");
+    if(active)switchTab(active.id.replace("tab-",""));
+    else updateGeneral();
+  });
 }
 
 function switchTab(name){
