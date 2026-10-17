@@ -93,18 +93,18 @@ input[type=text]:focus{border-color:var(--accent)}
 <div id="loading"><div class="spinner"></div><p>Cargando datos IPC...</p></div>
 <header>
   <div class="logo">Fuente &middot; INE Bolivia</div>
-  <h1>Dashboard de la Inflaci&oacute;n para Bolivia</h1>
+  <h1>Dashboard de la Inflación para Bolivia</h1>
   <div class="subtitle" id="hdr-range"></div>
 </header>
 <div class="container">
   <div id="error-msg"></div>
   <div class="tabs" role="tablist" aria-label="Secciones del dashboard">
     <button class="tab active" role="tab" aria-selected="true" aria-controls="tab-general" onclick="switchTab('general')">IPC General</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-divisiones" onclick="switchTab('divisiones')">Por Divisi&oacute;n</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-divisiones" onclick="switchTab('divisiones')">Por división</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="tab-heatmap" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_gen" onclick="switchTab('contrib_gen')">Contribuciones a la inflación</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_div" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
-    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-documentacion" onclick="switchTab('documentacion')">Documentaci&oacute;n</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_div" onclick="switchTab('contrib_div')">Contribuciones por División</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-documentacion" onclick="switchTab('documentacion')">Documentación</button>
   </div>
 
   <!-- TAB GENERAL -->
@@ -122,16 +122,16 @@ input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="kpi-row" id="gen-kpis"></div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n General &mdash; <em id="gen-chart-title" style="color:var(--accent);font-style:normal"></em></div>
+      <div class="card-title"><span class="bar"></span>Inflación General &mdash; <em id="gen-chart-title" style="color:var(--accent);font-style:normal"></em></div>
       <canvas id="chart-gen-line"></canvas>
     </div>
     <div class="grid2">
       <div class="card">
-        <div class="card-title"><span class="bar"></span>Nivel del &Iacute;ndice de Precios al Consumidor</div>
+        <div class="card-title"><span class="bar"></span>Nivel del Índice de Precios al Consumidor</div>
         <canvas id="chart-gen-level"></canvas>
       </div>
       <div class="card">
-        <div class="card-title"><span class="bar"></span>Comparativa por Divisi&oacute;n (&uacute;ltimo periodo)</div>
+        <div class="card-title"><span class="bar"></span>Comparativa por División (último periodo)</div>
         <canvas id="chart-div-bar"></canvas>
       </div>
     </div>
@@ -140,7 +140,7 @@ input[type=text]:focus{border-color:var(--accent)}
   <!-- TAB DIVISIONES -->
   <div class="tab-panel" id="tab-divisiones" role="tabpanel" aria-labelledby="tab-divisiones">
     <div class="controls">
-      <label id="div-div-label">Divisi&oacute;n</label>
+      <label id="div-div-label">División</label>
       <select id="sel-div" aria-labelledby="div-div-label" onchange="updateDivision()"></select>
       <label id="div-period-label">Periodo</label>
       <select id="div-from" aria-labelledby="div-period-label" onchange="updateDivision()"></select>
@@ -154,7 +154,7 @@ input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="kpi-row" id="div-kpis"></div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n Divisi&oacute;n vs General</div>
+      <div class="card-title"><span class="bar"></span>Inflación División vs General</div>
       <canvas id="chart-div-line"></canvas>
     </div>
   </div>
@@ -168,14 +168,14 @@ input[type=text]:focus{border-color:var(--accent)}
         <button class="mbtn" id="hmbtn-acumulada" onclick="setHmMeasure('acumulada')">Acumulada</button>
         <button class="mbtn" id="hmbtn-a12m" onclick="setHmMeasure('a12m')">12 meses</button>
       </div>
-      <label id="hm-year-label">A&ntilde;o</label>
+      <label id="hm-year-label">Año</label>
       <select id="hm-year" aria-labelledby="hm-year-label" onchange="renderHeatmap()"></select>
     </div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Inflaci&oacute;n por Divisi&oacute;n y Mes</div>
+      <div class="card-title"><span class="bar"></span>Inflación por División y Mes</div>
       <div class="hm-legend">
-        <span><span class="hm-swatch" style="background:#f85149"></span> Inflaci&oacute;n (rojo)</span>
-        <span><span class="hm-swatch" style="background:#3fb950"></span> Deflaci&oacute;n (verde)</span>
+        <span><span class="hm-swatch" style="background:#f85149"></span> Inflación (rojo)</span>
+        <span><span class="hm-swatch" style="background:#3fb950"></span> Deflación (verde)</span>
         <span><span class="hm-swatch" style="background:var(--bg3);border:1px solid var(--border)"></span> Sin dato</span>
         <span>Intensidad: 0% = gris, &gt;=8 pp = color pleno</span>
       </div>
@@ -198,11 +198,11 @@ input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="kpi-row" id="cg-kpis"></div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Top 50 contribuyentes a la inflaci&oacute;n general</div>
+      <div class="card-title"><span class="bar"></span>Top 50 contribuyentes a la Inflación general</div>
       <div class="contrib-wrap" id="cg-table"></div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Descomposici&oacute;n de la inflaci&oacute;n general por divisi&oacute;n</div>
+      <div class="card-title"><span class="bar"></span>Descomposición de la inflación general por división</div>
       <canvas id="chart-cg-stacked"></canvas>
     </div>
   </div>
@@ -210,7 +210,7 @@ input[type=text]:focus{border-color:var(--accent)}
   <!-- TAB CONTRIB DIV -->
   <div class="tab-panel" id="tab-contrib_div" role="tabpanel" aria-labelledby="tab-contrib_div">
     <div class="controls">
-      <label id="cd-div-label">Divisi&oacute;n</label>
+      <label id="cd-div-label">División</label>
       <select id="cd-div" aria-labelledby="cd-div-label" onchange="renderContribDiv()"></select>
       <label id="cd-period-label">Periodo</label>
       <select id="cd-period" aria-labelledby="cd-period-label" onchange="renderContribDiv()"></select>
@@ -224,7 +224,7 @@ input[type=text]:focus{border-color:var(--accent)}
     </div>
     <div class="kpi-row" id="cd-kpis"></div>
     <div class="card">
-      <div class="card-title"><span class="bar"></span>Contribuci&oacute;n de productos a la inflaci&oacute;n de la divisi&oacute;n</div>
+      <div class="card-title"><span class="bar"></span>Contribución de productos a la inflación de la división</div>
       <div class="contrib-wrap" id="cd-table"></div>
     </div>
   </div>
@@ -234,101 +234,84 @@ input[type=text]:focus{border-color:var(--accent)}
     <div class="card">
       <div class="doc" id="doc-content">
 
-        <h2>&iquest;Qu&eacute; es el IPC?</h2>
+        <h2>&iquest;Qué es el IPC?</h2>
         <p>
-          El <strong>&Iacute;ndice de Precios al Consumidor (IPC)</strong> es un indicador estad&iacute;stico que mide la
-          evoluci&oacute;n en el tiempo del nivel general de precios de una canasta de bienes y servicios representativa
-          del consumo de los hogares. A trav&eacute;s de &eacute;l se estima la <strong>inflaci&oacute;n</strong>, es decir,
-          el cambio porcentual de los precios entre dos per&iacute;odos.
+          El <strong>Índice de Precios al Consumidor (IPC)</strong> es un indicador estadístico que mide la evolución en el tiempo del nivel general de precios de una canasta de bienes y servicios representativa del consumo de los hogares. A través de él se estima la <strong>Inflación </strong>, es decir, el cambio porcentual de los precios entre dos períodos. La canasta está conformada por 397 productos genéricos (con base en el año 2016).
         </p>
         <p>
-          El IPC se expresa como un <strong>n&uacute;mero &iacute;ndice</strong> con un a&ntilde;o base al que se le asigna
-          el valor <span class="mono">100</span>. En este dashboard la base es <strong>2016 = 100</strong>, de modo que un
-          valor de 115 significa que los precios de la canasta son 15% m&aacute;s altos que en 2016.
+          El IPC se expresa como un <strong>número índice</strong> con un año base al que se le asigna el valor <span class="mono">100</span>. En este dashboard la base es <strong>2016 = 100</strong>, de modo que un valor de 115 significa que los precios de la canasta son 15% más altos que en 2016.
         </p>
 
-        <h2>&iquest;C&oacute;mo se construyen las mediciones del IPC?</h2>
-        <p>La construcci&oacute;n del IPC sigue, de forma resumida, estas etapas:</p>
+        <h2>&iquest;Cómo se construyen las mediciones del IPC?</h2>
+        <p>La construcción del IPC sigue, de forma resumida, estas etapas:</p>
         <ol>
-          <li><strong>Definici&oacute;n de la canasta:</strong> se identifican los bienes y servicios que consumen los hogares, con base en encuestas de hogares y del gasto.</li>
-          <li><strong>Ponderaciones:</strong> a cada producto se le asigna un ponderador \(P_i\) que refleja su importancia relativa en el gasto total (su participaci&oacute;n en la canasta).</li>
-          <li><strong>Recolecci&oacute;n mensual:</strong> personal del INE releva regularmente los precios de cada producto en el periodo \(t\).</li>
-          <li><strong>Agregaci&oacute;n:</strong> los precios se combinan en &iacute;ndices por producto, luego por divisi&oacute;n y finalmente en el IPC general, usando las ponderaciones.</li>
-          <li><strong>C&aacute;lculo de variaciones:</strong> a partir del IPC se obtienen las inflaciones mensual, acumulada y a 12 meses.</li>
+          <li><strong>Definición de la canasta:</strong> el INE identifica los bienes y servicios que consumen los hogares, con base en la Encuesta de Presupuestos Familiares.</li>
+          <li><strong>Ponderaciones:</strong> a cada producto se le asigna un ponderador \(P_i\) que refleja su importancia relativa en el gasto total (su participación en la canasta).</li>
+          <li><strong>Recolección mensual:</strong> personal del INE recopila mensualmente los precios de cada producto en el periodo \(t\).</li>
+          <li><strong>Agregación:</strong> los precios se combinan en índices por producto \(IPC_{i,t}\), luego por división \(IPC_{t}^{(d)}\) y finalmente en el IPC general \(IPC_{t}^{GEN}\), usando las ponderaciones.</li>
+          <li><strong>Cálculo de variaciones:</strong> a partir del IPC se obtienen las inflaciones mensual, acumulada y a 12 meses.</li>
         </ol>
 
         <h2>Las 12 divisiones del IPC</h2>
         <p>
-          El IPC se organiza jer&aacute;rquicamente. En el primer nivel se encuentran <strong>12 divisiones</strong>; cada
-          divisi&oacute;n agrupa productos afines y, dentro de ella, la suma de las ponderaciones de sus productos es el
-          100% de esa divisi&oacute;n:
+          El IPC general se organiza jerarquicamente. En el primer nivel se encuentran <strong>12 divisiones</strong>; cada división agrupa productos afines y, dentro de ella, la suma de las ponderaciones de sus productos es el
+          100% de esa división:
         </p>
         <ul class="div-list">
-          <li><span class="div-code">01</span> Alimentos y Bebidas No Alcoh&oacute;licas</li>
-          <li><span class="div-code">02</span> Bebidas Alcoh&oacute;licas y Tabaco</li>
+          <li><span class="div-code">01</span> Alimentos y Bebidas No Alcohólicas</li>
+          <li><span class="div-code">02</span> Bebidas Alcohólicas y Tabaco</li>
           <li><span class="div-code">03</span> Prendas de Vestir y Calzados</li>
-          <li><span class="div-code">04</span> Vivienda y Servicios B&aacute;sicos</li>
-          <li><span class="div-code">05</span> Muebles, Bienes y Servicios Dom&eacute;sticos</li>
+          <li><span class="div-code">04</span> Vivienda y Servicios Básicos</li>
+          <li><span class="div-code">05</span> Muebles, Bienes y Servicios Domésticos</li>
           <li><span class="div-code">06</span> Salud</li>
           <li><span class="div-code">07</span> Transporte</li>
           <li><span class="div-code">08</span> Comunicaciones</li>
-          <li><span class="div-code">09</span> Recreaci&oacute;n y Cultura</li>
-          <li><span class="div-code">10</span> Educaci&oacute;n</li>
+          <li><span class="div-code">09</span> Recreación y Cultura</li>
+          <li><span class="div-code">10</span> Educación</li>
           <li><span class="div-code">11</span> Alimentos y Bebidas Fuera del Hogar</li>
           <li><span class="div-code">12</span> Bienes y Servicios Diversos</li>
         </ul>
 
-        <h2>Normalizaci&oacute;n de las ponderaciones</h2>
+        <h2>Normalización de las ponderaciones</h2>
         <p>
-          Cada producto tiene una ponderaci&oacute;n <strong>global</strong> \(P_i\) que representa
-          su peso dentro de la canasta total del IPC. Sin embargo, para analizar una divisi&oacute;n por separado conviene
-          trabajar con el peso de cada producto <strong>dentro de esa divisi&oacute;n</strong>. Por eso, para cada
-          divisi&oacute;n \(d\) las ponderaciones de sus productos se <strong>normalizan</strong>
-          para que sumen 100%:
+          Cada producto tiene una ponderación <strong>global</strong> \(P_i\) que representa su peso dentro de la canasta total del IPC. Sin embargo, para analizar una división por separado conviene trabajar con el peso de cada producto <strong>dentro de esa división</strong>. Por ello, para cada división \(d\) las ponderaciones de sus productos se <strong>normalizan</strong> para que sumen 1 (o 100%):
         </p>
-        <div class="formula">\[ w_i^{(d)} = \frac{P_i}{\displaystyle\sum_{j \in d} P_j} \times 100 \]</div>
+        <div class="formula">\[ w_i^{(d)} = \frac{P_i}{\displaystyle\sum_{j \in d} P_j} \]</div>
         <p>
-          donde \(w_i^{(d)}\) es la ponderaci&oacute;n normalizada del producto \(i\)
-          dentro de la divisi&oacute;n \(d\), \(P_i\) es su ponderador global y la
-          suma recorre todos los productos \(j\) que pertenecen a esa divisi&oacute;n.
+          donde \(w_i^{(d)}\) es la ponderación normalizada del producto \(i\) dentro de la división \(d\), \(P_i\) es su ponderador global y la suma recorre todos los productos \(j\) que pertenecen a esa división \(d\).
         </p>
         <div class="note">
-          Con esta normalizaci&oacute;n se cumple que \(\sum_{i} w_i^{(d)} = 100\) dentro de cada
-          divisi&oacute;n. La ponderaci&oacute;n global de cada producto se conserva por separado para las contribuciones al
-          IPC general.
+          Con esta normalización se cumple que \(\sum_{i} w_i^{(d)} = 1\) dentro de cada división. La ponderación global de cada producto se conserva por separado para las contribuciones al IPC general.
         </div>
-        <p>El &iacute;ndice de una divisi&oacute;n en el per&iacute;odo \(t\) es la suma ponderada de los &iacute;ndices de sus productos:</p>
-        <div class="formula">\[ IPC_{d,t} = \sum_{i \in d} \frac{w_i^{(d)}}{100} \cdot IPC_{i,t} \]</div>
+        <p>El IPC de una división en el período \(t\) es la suma ponderada de los índices de sus productos:</p>
+        <div class="formula">\[ IPC_{t}^{(d)} = \sum_{i \in d} w_i^{(d)} \cdot IPC_{i,t} \]</div>
 
-        <h2>Medidas de inflaci&oacute;n</h2>
-        <p>A partir del IPC se calculan tres variaciones porcentuales:</p>
-        <p><strong>Inflaci&oacute;n mensual</strong> (respecto al mes anterior):</p>
+        <h2>Medidas de inflación</h2>
+        <p>A partir del IPC, ya se el general o el de la división, se calculan tres variaciones porcentuales:</p>
+        <p><strong>Inflación mensual</strong> (respecto al mes anterior):</p>
         <div class="formula">\[ \pi_t = \left( \frac{IPC_t}{IPC_{t-1}} - 1 \right) \times 100 \]</div>
-        <p><strong>Inflaci&oacute;n acumulada</strong> (respecto a diciembre del a&ntilde;o anterior):</p>
+        <p><strong>Inflación acumulada</strong> (respecto a diciembre del año anterior):</p>
         <div class="formula">\[ \pi_t^{acum} = \left( \frac{IPC_t}{IPC_{dic,\,(a-1)}} - 1 \right) \times 100 \]</div>
-        <p><strong>Inflaci&oacute;n a 12 meses</strong> (respecto al mismo mes del a&ntilde;o anterior):</p>
+        <p><strong>Inflación a 12 meses</strong> (respecto al mismo mes del año anterior):</p>
         <div class="formula">\[ \pi_t^{12m} = \left( \frac{IPC_t}{IPC_{t-12}} - 1 \right) \times 100 \]</div>
 
-        <h2>Contribuci&oacute;n de los productos a la inflaci&oacute;n</h2>
+        <h2>Contribución de los productos a la inflación</h2>
         <p>
-          La contribuci&oacute;n de un producto mide cu&aacute;ntos puntos porcentuales de la inflaci&oacute;n aporta ese
-          producto. Se obtiene combinando su ponderaci&oacute;n con su propia variaci&oacute;n de precios, relativizada por
-          el &iacute;ndice de referencia.
+          La contribución de un producto mide cuántos puntos porcentuales de la inflación aporta ese producto. Se obtiene combinando su ponderaciones con su propia variación de precios, relativizada por el índice de referencia. Para la exposición de las formulas se tomará como ejemplo el indicador de la inflación mensual.
         </p>
-        <p><strong>Contribuci&oacute;n a la inflaci&oacute;n de su divisi&oacute;n:</strong></p>
-        <div class="formula">\[ c_i^{div} = \frac{w_i^{(d)}}{100} \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{d,t-1}} \times 100 \]</div>
-        <p><strong>Contribuci&oacute;n a la inflaci&oacute;n general:</strong></p>
-        <div class="formula">\[ c_i^{gen} = \frac{P_i}{100} \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{gen,t-1}} \times 100 \]</div>
+        <p><strong>Contribución a la inflación de su división:</strong></p>
+        <div class="formula">\[ c_i^{(d)} = w_i^{(d)} \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{t-1}^{(d)}} \times 100 \]</div>
+        <p><strong>Contribución a la inflación general:</strong></p>
+        <div class="formula">\[ c_i^{gen} = P_i \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{t-1}^{GEN}} \times 100 \]</div>
+        
         <div class="note">
-          La suma de las contribuciones de todos los productos de una divisi&oacute;n reconstruye la inflaci&oacute;n de
-          esa divisi&oacute;n; y la suma de las contribuciones de todas las divisiones reconstruye la inflaci&oacute;n
-          general. Esto permite identificar qu&eacute; productos explican la inflaci&oacute;n de cada per&iacute;odo.
+          La suma de las contribuciones de todos los productos de una división reconstruye la inflación de esa división; y la suma de las contribuciones de todas las divisiones reconstruye la inflación general. Esto permite identificar qué productos explican la inflación de cada período.
         </div>
 
         <h2>Notas de trabajo</h2>
         <p>
           <em>
-            Fuente: Instituto Nacional de Estadística Bolivia
+            Fuente: Elaboración a partir de los datos proporcionados por el Instituto Nacional de estadística de Bolivia.
           </em>
         </p>
 
