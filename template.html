@@ -251,8 +251,8 @@ input[type=text]:focus{border-color:var(--accent)}
         <p>La construcci&oacute;n del IPC sigue, de forma resumida, estas etapas:</p>
         <ol>
           <li><strong>Definici&oacute;n de la canasta:</strong> se identifican los bienes y servicios que consumen los hogares, con base en encuestas de hogares y del gasto.</li>
-          <li><strong>Ponderaciones:</strong> a cada producto se le asigna un ponderador <span class="mono">P_i</span> que refleja su importancia relativa en el gasto total (su participaci&oacute;n en la canasta).</li>
-          <li><strong>Recolecci&oacute;n mensual:</strong> personal del INE releva regularmente los precios de cada producto en el per&iacute;odo <span class="mono">t</span>.</li>
+          <li><strong>Ponderaciones:</strong> a cada producto se le asigna un ponderador \(P_i\) que refleja su importancia relativa en el gasto total (su participaci&oacute;n en la canasta).</li>
+          <li><strong>Recolecci&oacute;n mensual:</strong> personal del INE releva regularmente los precios de cada producto en el periodo \(t\).</li>
           <li><strong>Agregaci&oacute;n:</strong> los precios se combinan en &iacute;ndices por producto, luego por divisi&oacute;n y finalmente en el IPC general, usando las ponderaciones.</li>
           <li><strong>C&aacute;lculo de variaciones:</strong> a partir del IPC se obtienen las inflaciones mensual, acumulada y a 12 meses.</li>
         </ol>
@@ -280,24 +280,24 @@ input[type=text]:focus{border-color:var(--accent)}
 
         <h2>Normalizaci&oacute;n de las ponderaciones</h2>
         <p>
-          Cada producto tiene una ponderaci&oacute;n <strong>global</strong> <span class="mono">P_i</span> que representa
+          Cada producto tiene una ponderaci&oacute;n <strong>global</strong> \(P_i\) que representa
           su peso dentro de la canasta total del IPC. Sin embargo, para analizar una divisi&oacute;n por separado conviene
           trabajar con el peso de cada producto <strong>dentro de esa divisi&oacute;n</strong>. Por eso, para cada
-          divisi&oacute;n <span class="mono">d</span> las ponderaciones de sus productos se <strong>normalizan</strong>
+          divisi&oacute;n \(d\) las ponderaciones de sus productos se <strong>normalizan</strong>
           para que sumen 100%:
         </p>
         <div class="formula">\[ w_i^{(d)} = \frac{P_i}{\displaystyle\sum_{j \in d} P_j} \times 100 \]</div>
         <p>
-          donde <span class="mono">w_i^(d)</span> es la ponderaci&oacute;n normalizada del producto <span class="mono">i</span>
-          dentro de la divisi&oacute;n <span class="mono">d</span>, <span class="mono">P_i</span> es su ponderador global y la
-          suma recorre todos los productos <span class="mono">j</span> que pertenecen a esa divisi&oacute;n.
+          donde \(w_i^{(d)}\) es la ponderaci&oacute;n normalizada del producto \(i\)
+          dentro de la divisi&oacute;n \(d\), \(P_i\) es su ponderador global y la
+          suma recorre todos los productos \(j\) que pertenecen a esa divisi&oacute;n.
         </p>
         <div class="note">
-          Con esta normalizaci&oacute;n se cumple que <span class="mono">&sum; w_i^(d) = 100</span> dentro de cada
+          Con esta normalizaci&oacute;n se cumple que \(\sum_{i} w_i^{(d)} = 100\) dentro de cada
           divisi&oacute;n. La ponderaci&oacute;n global de cada producto se conserva por separado para las contribuciones al
           IPC general.
         </div>
-        <p>El &iacute;ndice de una divisi&oacute;n en el per&iacute;odo <span class="mono">t</span> es la suma ponderada de los &iacute;ndices de sus productos:</p>
+        <p>El &iacute;ndice de una divisi&oacute;n en el per&iacute;odo \(t\) es la suma ponderada de los &iacute;ndices de sus productos:</p>
         <div class="formula">\[ IPC_{d,t} = \sum_{i \in d} \frac{w_i^{(d)}}{100} \cdot IPC_{i,t} \]</div>
 
         <h2>Medidas de inflaci&oacute;n</h2>
@@ -325,10 +325,11 @@ input[type=text]:focus{border-color:var(--accent)}
           general. Esto permite identificar qu&eacute; productos explican la inflaci&oacute;n de cada per&iacute;odo.
         </div>
 
-        <h2>Pendientes / notas de trabajo</h2>
+        <h2>Notas de trabajo</h2>
         <p>
-          <em>Esta secci&oacute;n es editable: puedes agregar aqu&iacute; los detalles metodol&oacute;gicos que consideres
-          necesarios (fuentes, revisiones del a&ntilde;o base, cobertura, etc.).</em>
+          <em>
+            Fuente: Instituto Nacional de Estadística Bolivia
+          </em>
         </p>
 
       </div>
@@ -700,18 +701,26 @@ function initDashboard(data){
 
 function precomputeStackedData(){
   var labels=RAW.date_labels;
+  var hasDiv=!!RAW.contrib_gen_by_div;
   var dc={};
-  Object.keys(RAW.divisions).forEach(function(c){dc[c]=[];});
   ["mensual","acumulada","a12m"].forEach(function(m){
     dc[m]={};
     Object.keys(RAW.divisions).forEach(function(c){dc[m][c]=[];});
     labels.forEach(function(lbl){
-      var data=RAW.contrib_general[m][lbl]||[];
-      var bd={};
-      data.forEach(function(r){bd[r.div_code]=(bd[r.div_code]||0)+r.contrib_gen;});
-      Object.keys(RAW.divisions).forEach(function(c){
-        dc[m][c].push(bd[c]!==undefined?parseFloat(bd[c].toFixed(4)):null);
-      });
+      if(hasDiv){
+        var src=RAW.contrib_gen_by_div[m][lbl];
+        Object.keys(RAW.divisions).forEach(function(c){
+          var v=src?src[c]:null;
+          dc[m][c].push(v===undefined||v===null?null:parseFloat(v));
+        });
+      } else {
+        var data=RAW.contrib_general[m][lbl]||[];
+        var bd={};
+        data.forEach(function(r){bd[r.div_code]=(bd[r.div_code]||0)+r.contrib_gen;});
+        Object.keys(RAW.divisions).forEach(function(c){
+          dc[m][c].push(bd[c]!==undefined?parseFloat(bd[c].toFixed(4)):null);
+        });
+      }
     });
   });
   STACKED_CACHE = dc;

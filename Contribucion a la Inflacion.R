@@ -244,6 +244,37 @@ for (measure in c("mensual", "acumulada", "a12m")) {
   }
 }
 
+# -- Contribución exacta de cada división a la inflación general ------------
+# C_d = W_d * (IPC_d,t - IPC_d,b) / IPC_gen,b
+# donde W_d es el ponderador global (en %) de la división d.
+# La suma de estas 12 contribuciones reconstruye exactamente la inflación general.
+cat("Calculando contribución de cada división a la inflación general...\n")
+W_div <- sapply(names(divisions), function(code) {
+  sum(sapply(div_products[[code]], function(p) p$ponderador_global), na.rm = TRUE)
+})
+
+contrib_gen_by_div <- list()
+for (measure in c("mensual", "acumulada", "a12m")) {
+  contrib_gen_by_div[[measure]] <- list()
+  for (i in seq_along(date_labels)) {
+    lbl <- date_labels[i]
+    bi  <- get_bi(measure, i, dates[i])
+    if (is.na(bi)) next
+    blbl <- date_labels[bi]
+    ipc_gen_b <- safe_num(ipc_general[[blbl]])
+    vals <- list()
+    for (code in names(divisions)) {
+      ipc_d_t <- safe_num(div_ipc[[code]][[lbl]])
+      ipc_d_b <- safe_num(div_ipc[[code]][[blbl]])
+      cd <- if (!is.na(ipc_gen_b) && ipc_gen_b != 0 && !is.na(ipc_d_t) && !is.na(ipc_d_b)) {
+        round(W_div[[code]] * (ipc_d_t - ipc_d_b) / ipc_gen_b, 4)
+      } else 0
+      vals[[code]] <- cd
+    }
+    contrib_gen_by_div[[measure]][[lbl]] <- vals
+  }
+}
+
 # -- Construir objeto final ------------------------------------------------
 data_out <- list(
   date_labels = date_labels,
@@ -252,7 +283,8 @@ data_out <- list(
   inf_general = inf_general,
   inf_div = inf_div,
   contrib_data = contrib_data,
-  contrib_general = contrib_general
+  contrib_general = contrib_general,
+  contrib_gen_by_div = contrib_gen_by_div
 )
 
 # -- Guardar JSON externo --------------------------------------------------
