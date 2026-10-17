@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard IPC Bolivia</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 :root{
@@ -14,19 +17,11 @@
   --hm-base:236,240,244;
   --font:"IBM Plex Sans",sans-serif;--mono:"IBM Plex Mono",monospace;
 }
-[data-theme="dark"]{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;
-  --text:#e6edf3;--text2:#8b949e;
-  --accent:#0054a6;--accent2:#3fb950;--warn:#f85149;--gold:#d29922;--info:#39d0d8;
-  --hm-base:33,38,45;
-}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh}
 header{background:var(--bg2);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
 .logo{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--accent);padding:3px 8px;border-radius:3px;white-space:nowrap}
 header h1{font-size:15px;font-weight:500}
-#theme-toggle{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-family:var(--font);white-space:nowrap;transition:all .15s}
-#theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 .subtitle{font-size:12px;color:var(--text2);margin-left:auto;white-space:nowrap}
 .container{max-width:1400px;margin:0 auto;padding:24px}
 .tabs{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:4px;margin-bottom:24px;overflow-x:auto}
@@ -77,6 +72,20 @@ input[type=text]:focus{border-color:var(--accent)}
 @keyframes spin{to{transform:rotate(360deg)}}
 #loading p{color:var(--text2);font-size:13px}
 #error-msg{display:none;background:rgba(248,81,73,.1);border:1px solid var(--warn);border-radius:8px;padding:16px 20px;color:var(--warn);font-size:13px;margin-bottom:20px}
+.doc{max-width:920px;line-height:1.65;color:var(--text)}
+.doc h2{font-size:17px;font-weight:600;margin:30px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.doc h2:first-child{margin-top:0}
+.doc h3{font-size:14px;font-weight:600;margin:18px 0 8px}
+.doc p{margin:0 0 12px}
+.doc ul,.doc ol{margin:0 0 12px 22px}
+.doc li{margin-bottom:6px}
+.doc .div-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:6px 18px;margin-bottom:12px;list-style:none;margin-left:0}
+.doc .div-list li{font-size:13px;display:flex;gap:8px;align-items:baseline}
+.doc .div-code{font-family:var(--mono);color:var(--accent);font-size:11px;min-width:22px}
+.doc .formula{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin:0 0 14px;overflow-x:auto;text-align:center}
+.doc .note{background:var(--bg);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:10px 14px;margin:0 0 14px;font-size:13px;color:var(--text2)}
+.doc .katex{font-size:1.06em}
+.doc .mono{font-family:var(--mono);background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:12px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
 </head>
@@ -85,7 +94,6 @@ input[type=text]:focus{border-color:var(--accent)}
 <header>
   <div class="logo">Fuente &middot; INE Bolivia</div>
   <h1>Dashboard de la Inflaci&oacute;n para Bolivia</h1>
-  <button id="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema (claro/oscuro)">☀️ Claro</button>
   <div class="subtitle" id="hdr-range"></div>
 </header>
 <div class="container">
@@ -96,6 +104,7 @@ input[type=text]:focus{border-color:var(--accent)}
     <button class="tab" role="tab" aria-selected="false" aria-controls="tab-heatmap" onclick="switchTab('heatmap')">Heatmap Divisiones</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_gen" onclick="switchTab('contrib_gen')">Contribuciones a la inflación</button>
     <button class="tab" role="tab" aria-selected="false" aria-controls="tab-contrib_div" onclick="switchTab('contrib_div')">Contribuciones por Divisi&oacute;n</button>
+    <button class="tab" role="tab" aria-selected="false" aria-controls="tab-documentacion" onclick="switchTab('documentacion')">Documentaci&oacute;n</button>
   </div>
 
   <!-- TAB GENERAL -->
@@ -217,6 +226,112 @@ input[type=text]:focus{border-color:var(--accent)}
     <div class="card">
       <div class="card-title"><span class="bar"></span>Contribuci&oacute;n de productos a la inflaci&oacute;n de la divisi&oacute;n</div>
       <div class="contrib-wrap" id="cd-table"></div>
+    </div>
+  </div>
+
+  <!-- TAB DOCUMENTACION -->
+  <div class="tab-panel" id="tab-documentacion" role="tabpanel" aria-labelledby="tab-documentacion">
+    <div class="card">
+      <div class="doc" id="doc-content">
+
+        <h2>&iquest;Qu&eacute; es el IPC?</h2>
+        <p>
+          El <strong>&Iacute;ndice de Precios al Consumidor (IPC)</strong> es un indicador estad&iacute;stico que mide la
+          evoluci&oacute;n en el tiempo del nivel general de precios de una canasta de bienes y servicios representativa
+          del consumo de los hogares. A trav&eacute;s de &eacute;l se estima la <strong>inflaci&oacute;n</strong>, es decir,
+          el cambio porcentual de los precios entre dos per&iacute;odos.
+        </p>
+        <p>
+          El IPC se expresa como un <strong>n&uacute;mero &iacute;ndice</strong> con un a&ntilde;o base al que se le asigna
+          el valor <span class="mono">100</span>. En este dashboard la base es <strong>2016 = 100</strong>, de modo que un
+          valor de 115 significa que los precios de la canasta son 15% m&aacute;s altos que en 2016.
+        </p>
+
+        <h2>&iquest;C&oacute;mo se construyen las mediciones del IPC?</h2>
+        <p>La construcci&oacute;n del IPC sigue, de forma resumida, estas etapas:</p>
+        <ol>
+          <li><strong>Definici&oacute;n de la canasta:</strong> se identifican los bienes y servicios que consumen los hogares, con base en encuestas de hogares y del gasto.</li>
+          <li><strong>Ponderaciones:</strong> a cada producto se le asigna un ponderador <span class="mono">P_i</span> que refleja su importancia relativa en el gasto total (su participaci&oacute;n en la canasta).</li>
+          <li><strong>Recolecci&oacute;n mensual:</strong> personal del INE releva regularmente los precios de cada producto en el per&iacute;odo <span class="mono">t</span>.</li>
+          <li><strong>Agregaci&oacute;n:</strong> los precios se combinan en &iacute;ndices por producto, luego por divisi&oacute;n y finalmente en el IPC general, usando las ponderaciones.</li>
+          <li><strong>C&aacute;lculo de variaciones:</strong> a partir del IPC se obtienen las inflaciones mensual, acumulada y a 12 meses.</li>
+        </ol>
+
+        <h2>Las 12 divisiones del IPC</h2>
+        <p>
+          El IPC se organiza jer&aacute;rquicamente. En el primer nivel se encuentran <strong>12 divisiones</strong>; cada
+          divisi&oacute;n agrupa productos afines y, dentro de ella, la suma de las ponderaciones de sus productos es el
+          100% de esa divisi&oacute;n:
+        </p>
+        <ul class="div-list">
+          <li><span class="div-code">01</span> Alimentos y Bebidas No Alcoh&oacute;licas</li>
+          <li><span class="div-code">02</span> Bebidas Alcoh&oacute;licas y Tabaco</li>
+          <li><span class="div-code">03</span> Prendas de Vestir y Calzados</li>
+          <li><span class="div-code">04</span> Vivienda y Servicios B&aacute;sicos</li>
+          <li><span class="div-code">05</span> Muebles, Bienes y Servicios Dom&eacute;sticos</li>
+          <li><span class="div-code">06</span> Salud</li>
+          <li><span class="div-code">07</span> Transporte</li>
+          <li><span class="div-code">08</span> Comunicaciones</li>
+          <li><span class="div-code">09</span> Recreaci&oacute;n y Cultura</li>
+          <li><span class="div-code">10</span> Educaci&oacute;n</li>
+          <li><span class="div-code">11</span> Alimentos y Bebidas Fuera del Hogar</li>
+          <li><span class="div-code">12</span> Bienes y Servicios Diversos</li>
+        </ul>
+
+        <h2>Normalizaci&oacute;n de las ponderaciones</h2>
+        <p>
+          Cada producto tiene una ponderaci&oacute;n <strong>global</strong> <span class="mono">P_i</span> que representa
+          su peso dentro de la canasta total del IPC. Sin embargo, para analizar una divisi&oacute;n por separado conviene
+          trabajar con el peso de cada producto <strong>dentro de esa divisi&oacute;n</strong>. Por eso, para cada
+          divisi&oacute;n <span class="mono">d</span> las ponderaciones de sus productos se <strong>normalizan</strong>
+          para que sumen 100%:
+        </p>
+        <div class="formula">\[ w_i^{(d)} = \frac{P_i}{\displaystyle\sum_{j \in d} P_j} \times 100 \]</div>
+        <p>
+          donde <span class="mono">w_i^(d)</span> es la ponderaci&oacute;n normalizada del producto <span class="mono">i</span>
+          dentro de la divisi&oacute;n <span class="mono">d</span>, <span class="mono">P_i</span> es su ponderador global y la
+          suma recorre todos los productos <span class="mono">j</span> que pertenecen a esa divisi&oacute;n.
+        </p>
+        <div class="note">
+          Con esta normalizaci&oacute;n se cumple que <span class="mono">&sum; w_i^(d) = 100</span> dentro de cada
+          divisi&oacute;n. La ponderaci&oacute;n global de cada producto se conserva por separado para las contribuciones al
+          IPC general.
+        </div>
+        <p>El &iacute;ndice de una divisi&oacute;n en el per&iacute;odo <span class="mono">t</span> es la suma ponderada de los &iacute;ndices de sus productos:</p>
+        <div class="formula">\[ IPC_{d,t} = \sum_{i \in d} \frac{w_i^{(d)}}{100} \cdot IPC_{i,t} \]</div>
+
+        <h2>Medidas de inflaci&oacute;n</h2>
+        <p>A partir del IPC se calculan tres variaciones porcentuales:</p>
+        <p><strong>Inflaci&oacute;n mensual</strong> (respecto al mes anterior):</p>
+        <div class="formula">\[ \pi_t = \left( \frac{IPC_t}{IPC_{t-1}} - 1 \right) \times 100 \]</div>
+        <p><strong>Inflaci&oacute;n acumulada</strong> (respecto a diciembre del a&ntilde;o anterior):</p>
+        <div class="formula">\[ \pi_t^{acum} = \left( \frac{IPC_t}{IPC_{dic,\,(a-1)}} - 1 \right) \times 100 \]</div>
+        <p><strong>Inflaci&oacute;n a 12 meses</strong> (respecto al mismo mes del a&ntilde;o anterior):</p>
+        <div class="formula">\[ \pi_t^{12m} = \left( \frac{IPC_t}{IPC_{t-12}} - 1 \right) \times 100 \]</div>
+
+        <h2>Contribuci&oacute;n de los productos a la inflaci&oacute;n</h2>
+        <p>
+          La contribuci&oacute;n de un producto mide cu&aacute;ntos puntos porcentuales de la inflaci&oacute;n aporta ese
+          producto. Se obtiene combinando su ponderaci&oacute;n con su propia variaci&oacute;n de precios, relativizada por
+          el &iacute;ndice de referencia.
+        </p>
+        <p><strong>Contribuci&oacute;n a la inflaci&oacute;n de su divisi&oacute;n:</strong></p>
+        <div class="formula">\[ c_i^{div} = \frac{w_i^{(d)}}{100} \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{d,t-1}} \times 100 \]</div>
+        <p><strong>Contribuci&oacute;n a la inflaci&oacute;n general:</strong></p>
+        <div class="formula">\[ c_i^{gen} = \frac{P_i}{100} \cdot \frac{IPC_{i,t} - IPC_{i,t-1}}{IPC_{gen,t-1}} \times 100 \]</div>
+        <div class="note">
+          La suma de las contribuciones de todos los productos de una divisi&oacute;n reconstruye la inflaci&oacute;n de
+          esa divisi&oacute;n; y la suma de las contribuciones de todas las divisiones reconstruye la inflaci&oacute;n
+          general. Esto permite identificar qu&eacute; productos explican la inflaci&oacute;n de cada per&iacute;odo.
+        </div>
+
+        <h2>Pendientes / notas de trabajo</h2>
+        <p>
+          <em>Esta secci&oacute;n es editable: puedes agregar aqu&iacute; los detalles metodol&oacute;gicos que consideres
+          necesarios (fuentes, revisiones del a&ntilde;o base, cobertura, etc.).</em>
+        </p>
+
+      </div>
     </div>
   </div>
 </div>
@@ -545,29 +660,8 @@ function renderContribDiv(){
   document.getElementById("cd-table").innerHTML=html;
 }
 
-function toggleTheme(){
-  var d=document.documentElement;
-  var cur=d.getAttribute("data-theme")||"light";
-  var next=cur==="light"?"dark":"light";
-  d.setAttribute("data-theme",next);
-  localStorage.setItem("theme",next);
-  document.getElementById("theme-toggle").textContent=next==="light"?"☀️ Claro":"🌙 Oscuro";
-  
-  requestAnimationFrame(function(){
-    DIV_COLORS = getDivColors();
-    Object.keys(charts).forEach(destroyChart);
-    var active=document.querySelector(".tab-panel.active");
-    if(active)switchTab(active.id.replace("tab-",""));
-    else updateGeneral();
-    // Second frame: ensure charts resize after layout
-    requestAnimationFrame(function(){
-      Object.values(charts).forEach(function(c){ if(c && c.resize) c.resize(); });
-    });
-  });
-}
-
 function switchTab(name){
-  var tabs=["general","divisiones","heatmap","contrib_gen","contrib_div"];
+  var tabs=["general","divisiones","heatmap","contrib_gen","contrib_div","documentacion"];
   document.querySelectorAll(".tab").forEach(function(t,i){
     t.classList.toggle("active",tabs[i]===name);
     t.setAttribute("aria-selected", tabs[i]===name);
@@ -579,13 +673,25 @@ function switchTab(name){
   if(name==="heatmap")renderHeatmap();
   if(name==="contrib_gen")renderContribGeneral();
   if(name==="contrib_div")renderContribDiv();
+  if(name==="documentacion")renderDocMath();
+}
+
+var DOC_MATH_DONE=false;
+function renderDocMath(){
+  if(DOC_MATH_DONE||typeof renderMathInElement==="undefined")return;
+  renderMathInElement(document.getElementById("doc-content"),{
+    delimiters:[
+      {left:"\\[",right:"\\]",display:true},
+      {left:"\\(",right:"\\)",display:false},
+      {left:"$$",right:"$$",display:true}
+    ],
+    throwOnError:false
+  });
+  DOC_MATH_DONE=true;
 }
 
 function initDashboard(data){
   RAW = data;
-  var saved=localStorage.getItem("theme");
-  if(saved)document.documentElement.setAttribute("data-theme",saved);
-  document.getElementById("theme-toggle").textContent=saved==="dark"?"🌙 Oscuro":"☀️ Claro";
   initSelects();
   precomputeStackedData();
   updateGeneral();
